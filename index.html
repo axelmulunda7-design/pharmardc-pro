@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PharmaRDC Pro - Gestion & Administration SaaS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        @media print {
+            body * { visibility: hidden; }
+            #sectionFactureImpression, #sectionFactureImpression * { visibility: visible; }
+            #sectionFactureImpression { 
+                position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; padding: 20px; background: white; z-index: 9999;
+            }
+            .no-print { display: none !important; }
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 h-full flex flex-col antialiased selection:bg-emerald-600 selection:text-white">
+
+    <!-- ESPACE ABONNEMENT UTILISATEUR (S'affiche si non abonné) -->
+    <div id="sectionAbonnement" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white text-slate-900 max-w-xl w-full rounded-3xl shadow-2xl p-8 border border-slate-200 space-y-6">
+            
+            <div class="text-center space-y-2">
+                <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-600 to-teal-500 mx-auto flex items-center justify-center shadow-lg text-3xl text-white">
+                    💊
+                </div>
+                <h2 class="text-2xl font-black text-slate-900">PharmaRDC Pro SaaS</h2>
+                <p class="text-xs text-slate-500 font-medium">Logiciel de Gestion Officinale & Facturation Normalisée DGI</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 p-5 rounded-2xl flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] bg-emerald-600 text-white px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Abonnement Officine</span>
+                    <h3 class="text-xl font-extrabold text-emerald-900 mt-1">Accès Complet Pro</h3>
+                    <p class="text-xs text-emerald-700 mt-0.5">Stock, Caisse POS, Factures avec QR Code DGI</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-3xl font-black text-emerald-800">5 $</span>
+                    <span class="text-xs text-emerald-600 block font-semibold">/ mois</span>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="border-b border-slate-100 pb-2 flex justify-between items-center">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Choisissez votre mode d'accès :</h4>
+                    <!-- Bouton Accès Admin Rapide -->
+                    <button onclick="ouvrirConnexionAdmin()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold underline">
+                        🔐 Accès Administrateur SaaS
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="selectionnerModePaiement('mobile')" id="btnMobile" class="p-3.5 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 text-xs font-bold transition flex flex-col items-center gap-1.5">
+                        <span class="text-xl">📱</span> Mobile Money
+                    </button>
+                    <button onclick="selectionnerModePaiement('carte')" id="btnCarte" class="p-3.5 rounded-2xl border-2 border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-bold transition flex flex-col items-center gap-1.5">
+                        <span class="text-xl">💳</span> Carte Bancaire
+                    </button>
+                    <button onclick="selectionnerModePaiement('code')" id="btnCode" class="p-3.5 rounded-2xl border-2 border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-bold transition flex flex-col items-center gap-1.5">
+                        <span class="text-xl">🔑</span> Code Licence
+                    </button>
+                </div>
+
+                <!-- Formulaires Paiement Client -->
+                <div id="formMobileMoney" class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                    <p class="text-xs font-semibold text-slate-600">Paiement instantané via USSD (M-Pesa, Orange, Airtel)</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <select id="operateurMobile" class="bg-white border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-800">
+                            <option value="M-Pesa">M-Pesa</option>
+                            <option value="Orange">Orange Money</option>
+                            <option value="Airtel">Airtel Money</option>
+                        </select>
+                        <input type="text" id="numTelephoneAbonnement" placeholder="Numéro (ex: 810000000)" class="col-span-2 bg-white border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800">
+                    </div>
+                    <button onclick="simulerPaiementMobile()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-extrabold text-xs transition shadow-md">
+                        Payer 5 $ & Activer mon Compte 🚀
+                    </button>
+                </div>
+
+                <div id="formCarteBancaire" class="hidden bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                    <p class="text-xs font-semibold text-slate-600">Paiement sécurisé par carte Visa / Mastercard</p>
+                    <input type="text" placeholder="Numéro de Carte (4242 ...)" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" placeholder="MM / AA" class="bg-white border border-slate-200 rounded-xl p-2.5 text-xs">
+                        <input type="text" placeholder="CVV" class="bg-white border border-slate-200 rounded-xl p-2.5 text-xs">
+                    </div>
+                    <button onclick="simulerPaiementCarte()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-extrabold text-xs transition shadow-md">
+                        Valider le Paiement 💳
+                    </button>
+                </div>
+
+                <div id="formCodeLicence" class="hidden bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                    <p class="text-xs font-semibold text-slate-600">Entrez le code prépayé fourni par l'administrateur :</p>
+                    <input type="text" id="inputCodePrepaye" placeholder="EX: PHARMA-2026-XXXX" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs font-mono uppercase text-slate-800 font-bold">
+                    <button onclick="verifierCodeLicence()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-extrabold text-xs transition shadow-md">
+                        Activer avec le Code 🔑
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE CONNEXION ADMINISTRATEUR SaaS -->
+    <div id="modaleAdminLogin" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white text-slate-900 max-w-sm w-full rounded-3xl shadow-2xl p-6 border space-y-4">
+            <div class="text-center">
+                <span class="text-3xl">🛡️</span>
+                <h3 class="text-base font-extrabold mt-1">Accès Super-Administrateur</h3>
+                <p class="text-xs text-slate-500">Entrez le mot de passe maître SaaS</p>
+            </div>
+            <input type="password" id="inputAdminPassword" placeholder="Mot de passe admin" class="w-full bg-slate-50 border rounded-xl p-3 text-sm text-center font-bold tracking-widest focus:outline-none focus:border-indigo-600">
+            <div class="flex gap-2">
+                <button onclick="validerConnexionAdmin()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-xs">Se Connecter</button>
+                <button onclick="fermerConnexionAdmin()" class="bg-slate-100 px-4 py-3 rounded-xl text-xs font-semibold">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD SUPER-ADMINISTRATEUR (Gestion des abonnés & licences) -->
+    <div id="sectionAdminDashboard" class="hidden fixed inset-0 bg-slate-900 z-50 overflow-y-auto p-4 lg:p-8 text-white">
+        <div class="max-w-6xl mx-auto space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <div>
+                    <h2 class="text-2xl font-black flex items-center gap-2">👑 Tableau de Bord Super-Admin SaaS</h2>
+                    <p class="text-xs text-slate-400">Gestion centrale des pharmacies abonnées (5 $/mois) & licences</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="fermerAdminDashboard()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition">
+                        🖥️ Accéder à l'Application Officine
+                    </button>
+                    <button onclick="deconnexionAdmin()" class="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition">
+                        🔒 Quitter Admin
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPIs Admin -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-slate-800/80 border border-slate-700 p-5 rounded-2xl">
+                    <p class="text-xs text-slate-400 uppercase font-semibold">Pharmacies Abonnées</p>
+                    <h3 id="adminTotalAbonnes" class="text-3xl font-black text-emerald-400 mt-1">1</h3>
+                </div>
+                <div class="bg-slate-800/80 border border-slate-700 p-5 rounded-2xl">
+                    <p class="text-xs text-slate-400 uppercase font-semibold">Revenu Mensuel (MRR)</p>
+                    <h3 id="adminMrr" class="text-3xl font-black text-teal-400 mt-1">5.00 $</h3>
+                </div>
+                <div class="bg-slate-800/80 border border-slate-700 p-5 rounded-2xl">
+                    <p class="text-xs text-slate-400 uppercase font-semibold">Codes Licence Actifs</p>
+                    <h3 id="adminTotalCodes" class="text-3xl font-black text-indigo-400 mt-1">3</h3>
+                </div>
+            </div>
+
+            <!-- Gestion des Codes de Licence -->
+            <div class="bg-slate-800/80 border border-slate-700 p-6 rounded-2xl space-y-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-base font-bold">🔑 Générateur de Codes de Licence (Prépayés 1 Mois)</h3>
+                        <p class="text-xs text-slate-400">Générez des codes uniques pour vos clients qui paient en espèces ou hors ligne</p>
+                    </div>
+                    <button onclick="genererNouveauCodeLicence()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs">
+                        + Générer un Code Licence
+                    </button>
+                </div>
+                <div class="overflow-x-auto rounded-xl border border-slate-700">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900 text-slate-400 border-b border-slate-700">
+                            <tr><th class="p-3">Code Licence</th><th class="p-3">Statut</th><th class="p-3">Action</th></tr>
+                        </thead>
+                        <tbody id="tableauCodesLicences" class="divide-y divide-slate-700/60 font-mono"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Liste des Pharmacies Abonnées -->
+            <div class="bg-slate-800/80 border border-slate-700 p-6 rounded-2xl space-y-4">
+                <h3 class="text-base font-bold">🏥 Registre des Pharmacies Abonnées</h3>
+                <div class="overflow-x-auto rounded-xl border border-slate-700">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900 text-slate-400 border-b border-slate-700">
+                            <tr><th class="p-3">Pharmacie</th><th class="p-3">NIF / Identifiant</th><th class="p-3">Statut Abonnement</th><th class="p-3">Action Admin</th></tr>
+                        </thead>
+                        <tbody id="tableauAbonnesAdmin" class="divide-y divide-slate-700/60"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- APPLICATION PRINCIPALE -->
+    <div id="applicationPrincipale" class="hidden flex-1 flex flex-col">
+        <header class="bg-white/90 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 px-6 py-4 flex flex-wrap justify-between items-center gap-4 no-print shadow-xs">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center shadow-md text-2xl text-white">
+                    💊
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 id="headerNomPharmacie" class="font-extrabold text-base tracking-tight text-slate-900 uppercase">PHARMACIE EXCELLENCE</h1>
+                        <span class="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Abonné Pro</span>
+                    </div>
+                    <p id="headerSousTitre" class="text-xs text-slate-500 font-medium">Kinshasa / RDC</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Bouton pour basculer vers le Dashboard Admin -->
+                <button onclick="ouvrirAdminDashboard()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3.5 py-2 rounded-2xl text-xs font-bold transition">
+                    👑 Panneau Admin SaaS
+                </button>
+                <button onclick="ouvrirParametresOfficine()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border px-3.5 py-2 rounded-2xl text-xs font-bold transition">
+                    ⚙️ Paramètres Fiscaux
+                </button>
+                <button onclick="deconnexionAbonnement()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border px-3.5 py-2 rounded-2xl text-xs font-bold transition">
+                    🔒 Verrouiller
+                </button>
+
+                <div class="bg-slate-100 border px-3.5 py-2 rounded-2xl flex items-center gap-2">
+                    <span class="text-xs text-slate-600 font-medium">Taux :</span>
+                    <input type="number" id="tauxChange" value="2850" class="bg-transparent text-emerald-700 font-extrabold text-sm w-16 text-right focus:outline-none" onchange="mettreAJourTaux()">
+                    <span class="text-xs text-slate-500 font-bold">CDF</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-[1700px] w-full mx-auto p-4 lg:p-6 space-y-6 no-print">
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white border rounded-3xl p-5 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-500 uppercase">CA (USD)</p>
+                        <h3 id="kpiCaUsd" class="text-3xl font-black text-emerald-700 mt-1">0.00 $</h3>
+                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-700 text-2xl">💵</div>
+                </div>
+                <div class="bg-white border rounded-3xl p-5 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-500 uppercase">CA (CDF)</p>
+                        <h3 id="kpiCaCdf" class="text-2xl font-black text-teal-700 mt-1">0 CDF</h3>
+                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-700 text-2xl">🇨🇩</div>
+                </div>
+                <div class="bg-white border rounded-3xl p-5 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-500 uppercase">Ventes</p>
+                        <h3 id="kpiTotalVentes" class="text-3xl font-black text-blue-700 mt-1">0</h3>
+                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-700 text-2xl">🧾</div>
+                </div>
+                <div class="bg-white border rounded-3xl p-5 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-500 uppercase">Alerte Lots</p>
+                        <h3 id="kpiAlertes" class="text-3xl font-black text-rose-600 mt-1">0</h3>
+                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-600 text-2xl">⚠️</div>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                <section class="xl:col-span-7 bg-white border rounded-3xl p-6 shadow-sm flex flex-col">
+                    <div class="flex justify-between items-center mb-5 pb-4 border-b">
+                        <h2 class="text-base font-bold">📦 Entrée de Stock Automatisée</h2>
+                        <button onclick="exporterStocksCSV()" class="bg-slate-100 text-xs px-4 py-2.5 rounded-xl font-semibold border">📥 Exporter Excel</button>
+                    </div>
+                    
+                    <div class="bg-slate-50 border p-4 rounded-2xl mb-5 space-y-3.5">
+                        <select id="selectCatalogue" class="w-full bg-white border text-sm rounded-xl p-3" onchange="remplissageAutomatiqueCatalogue()">
+                            <option value="">-- Sélectionner un médicament de référence --</option>
+                        </select>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <input type="text" id="nomProduit" placeholder="Nom Commercial" class="bg-white border text-sm rounded-xl px-3.5 py-2.5">
+                            <input type="text" id="numLot" placeholder="N° de Lot" class="bg-white border text-sm rounded-xl px-3.5 py-2.5">
+                            <input type="number" id="qteStock" placeholder="Quantité" class="bg-white border text-sm rounded-xl px-3.5 py-2.5">
+                            <input type="date" id="dateExp" class="bg-white border text-sm rounded-xl px-3.5 py-2.5">
+                            <input type="number" step="0.01" id="prixUsd" placeholder="Prix ($)" class="bg-white border text-sm rounded-xl px-3.5 py-2.5 sm:col-span-1 lg:col-span-2">
+                        </div>
+                        <button onclick="ajouterProduitStock()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold text-sm">+ Ajouter au Stock</button>
+                    </div>
+
+                    <div class="flex-1 overflow-x-auto rounded-2xl border max-h-[300px]">
+                        <table class="w-full text-left text-sm">
+                            <thead class="sticky top-0 bg-slate-100 text-xs uppercase border-b">
+                                <tr><th class="p-3.5">Produit</th><th class="p-3.5">Lot</th><th class="p-3.5">Qté</th><th class="p-3.5">Expiration</th><th class="p-3.5">Statut</th></tr>
+                            </thead>
+                            <tbody id="tableauStock" class="divide-y text-xs"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="xl:col-span-5 bg-white border rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="mb-5 pb-4 border-b">
+                            <h2 class="text-base font-bold">🛒 Caisse POS & Facturation</h2>
+                            <p class="text-xs text-slate-500">Taxes DGI (TVA 16%) intégrées</p>
+                        </div>
+
+                        <div class="bg-slate-50 border p-3.5 rounded-2xl mb-4 space-y-2.5">
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" id="clientNom" placeholder="Nom du Client" class="bg-white border text-xs rounded-xl p-2.5">
+                                <select id="regimeTva" class="bg-white border text-xs rounded-xl p-2.5" onchange="calculerTotalVente()">
+                                    <option value="16">TVA 16%</option>
+                                    <option value="0">Exonéré (0%)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3 mb-4">
+                            <select id="selectProduit" class="w-full bg-slate-50 border text-sm rounded-xl p-2.5" onchange="chargerPrixProduit()">
+                                <option value="">-- Choisir un médicament --</option>
+                            </select>
+                            <div class="grid grid-cols-2 gap-3">
+                                <input type="text" id="posPrixUsd" readonly placeholder="Prix ($)" class="bg-slate-100 border text-slate-700 font-extrabold text-sm rounded-xl p-2.5">
+                                <input type="number" id="posQte" value="1" min="1" class="bg-slate-50 border text-sm rounded-xl p-2.5" onchange="calculerTotalVente()">
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 border p-3.5 rounded-2xl mb-4 space-y-1.5 text-xs">
+                            <div class="flex justify-between"><span>Total HT :</span><span id="apercuHt">0.00 $</span></div>
+                            <div class="flex justify-between"><span>TVA :</span><span id="apercuTva">0.00 $</span></div>
+                            <div class="flex justify-between font-black text-base text-emerald-700 border-t pt-1.5"><span>TTC USD :</span><span id="totalUsdAffichage">0.00 $</span></div>
+                            <div class="flex justify-between font-bold text-teal-700"><span>TTC CDF :</span><span id="totalCdfAffichage">0 CDF</span></div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <select id="devisePaiement" class="bg-slate-50 border text-sm rounded-xl p-2.5">
+                                <option value="CDF">Francs (CDF)</option>
+                                <option value="USD">Dollars (USD)</option>
+                            </select>
+                            <input type="number" step="any" id="montantRecu" placeholder="Montant Reçu" class="bg-slate-50 border text-sm rounded-xl p-2.5">
+                        </div>
+                    </div>
+
+                    <button onclick="validerVenteEtGenererFacture()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-extrabold text-sm shadow-md">
+                        Émettre Facture Normalisée & QR Code 🖨️
+                    </button>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modales Paramètres & Facture -->
+    <div id="modaleParametres" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-md z-50 flex items-center justify-center p-4 no-print">
+        <div class="bg-white max-w-lg w-full rounded-3xl shadow-2xl p-6 space-y-4">
+            <h3 class="text-base font-extrabold">⚙️ Paramètres Fiscaux</h3>
+            <div class="space-y-3 text-sm">
+                <input type="text" id="inputNomPharmacie" placeholder="Nom" class="w-full bg-slate-50 border rounded-xl p-2.5">
+                <input type="text" id="inputAdressePharmacie" placeholder="Adresse" class="w-full bg-slate-50 border rounded-xl p-2.5">
+                <input type="text" id="inputNif" placeholder="NIF" class="w-full bg-slate-50 border rounded-xl p-2.5">
+            </div>
+            <div class="flex gap-2">
+                <button onclick="sauvegarderIdentiteOfficine()" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold text-xs">Enregistrer</button>
+                <button onclick="fermerParametresOfficine()" class="bg-slate-100 px-4 py-3 rounded-xl text-xs font-semibold">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sectionFactureImpression" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl p-6 relative border">
+            <div class="text-center border-b-2 border-slate-900 pb-2.5 mb-2.5">
+                <h2 id="factureNomPharmacie" class="text-sm font-black uppercase">PHARMACIE</h2>
+                <p id="factureAdressePharmacie" class="text-[10px] text-slate-600">Kinshasa / RDC</p>
+                <p id="factureNif" class="text-[9px] text-slate-500 font-mono mt-0.5">NIF: A000000</p>
+                <div class="mt-1 bg-slate-900 text-white px-3 py-0.5 rounded text-[10px] font-extrabold uppercase">FACTURE NORMALISÉE - DGI</div>
+            </div>
+
+            <div class="mb-2.5 text-[11px] grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded-xl">
+                <div>
+                    <p>Facture : <strong id="factureNum">FAC-0001</strong></p>
+                    <p>Client : <span id="factureClientNom">Client</span></p>
+                </div>
+                <div class="text-right">
+                    <p>Taux : <strong id="factureTaux">0</strong> CDF</p>
+                </div>
+            </div>
+
+            <table class="w-full text-[11px] mb-2.5 border-t border-b">
+                <thead><tr class="border-b text-left text-slate-600"><th class="py-1">Désignation</th><th class="py-1 text-center">Qté</th><th class="py-1 text-right">Total ($)</th></tr></thead>
+                <tbody id="factureLignes"></tbody>
+            </table>
+
+            <div class="space-y-1 text-[11px] border-b-2 border-slate-900 pb-2 mb-2 bg-slate-50 p-2 rounded-xl">
+                <div class="flex justify-between"><span>Total HT :</span><span id="factureTotalHt">0.00 $</span></div>
+                <div class="flex justify-between"><span>TVA :</span><span id="factureMontantTva">0.00 $</span></div>
+                <div class="flex justify-between font-extrabold text-xs"><span>TTC USD :</span><span id="factureTotalUsd">0.00 $</span></div>
+                <div class="flex justify-between font-bold text-blue-900"><span>TTC CDF :</span><span id="factureTotalCdf">0 CDF</span></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 items-center mb-4">
+                <div class="bg-slate-50 p-2 rounded-xl text-[10px] space-y-1">
+                    <div>Paiement : <strong id="factureDevisePaiement">USD</strong></div>
+                    <div>Reçu : <strong id="factureMontantRecu">0</strong></div>
+                    <div>Monnaie : <span id="factureMonnaieRendue">0</span></div>
+                </div>
+                <div class="flex flex-col items-center justify-center bg-white p-1 rounded-xl border">
+                    <div id="qrcode" class="w-16 h-16"></div>
+                    <span class="text-[8px] font-mono text-slate-400 mt-0.5">Vérification DGI</span>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="imprimerFactureActuelle()" class="flex-1 bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-xs">Imprimer</button>
+                <button onclick="fermerFacture()" class="bg-slate-100 px-4 py-2.5 rounded-xl text-xs font-semibold">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script SaaS Super-Admin -->
+    <script>
+        // GESTION ABONNEMENT ET ADMIN
+        let statutAbonnement = localStorage.getItem('statutAbonnement') || 'inactif';
+
+        function verifierAccesAbonnement() {
+            if(statutAbonnement === 'actif') {
+                document.getElementById('sectionAbonnement').classList.add('hidden');
+                document.getElementById('applicationPrincipale').classList.remove('hidden');
+            } else {
+                document.getElementById('sectionAbonnement').classList.remove('hidden');
+                document.getElementById('applicationPrincipale').classList.add('hidden');
+            }
+        }
+
+        // ESPACE ADMIN
+        function ouvrirConnexionAdmin() {
+            document.getElementById('modaleAdminLogin').classList.remove('hidden');
+        }
+        function fermerConnexionAdmin() {
+            document.getElementById('modaleAdminLogin').classList.add('hidden');
+        }
+        function validerConnexionAdmin() {
+            const mdp = document.getElementById('inputAdminPassword').value;
+            // Mot de passe Super-Admin (modifiable selon vos besoins)
+            if(mdp === "admin2026") {
+                fermerConnexionAdmin();
+                ouvrirAdminDashboard();
+            } else {
+                alert("Mot de passe administrateur incorrect.");
+            }
+        }
+
+        function ouvrirAdminDashboard() {
+            document.getElementById('sectionAdminDashboard').classList.remove('hidden');
+            chargerDonneesAdmin();
+        }
+        function fermerAdminDashboard() {
+            document.getElementById('sectionAdminDashboard').classList.add('hidden');
+        }
+        function deconnexionAdmin() {
+            fermerAdminDashboard();
+        }
+
+        let codesLicences = JSON.parse(localStorage.getItem('codesLicences')) || [
+            { code: "PHARMA-2026-A101", statut: "Disponible" },
+            { code: "PHARMA-2026-B202", statut: "Utilisé" },
+            { code: "PHARMA-2026-C303", statut: "Disponible" }
+        ];
+
+        let listeAbonnes = JSON.parse(localStorage.getItem('listeAbonnes')) || [
+            { nom: "PHARMACIE EXCELLENCE", nif: "A24001234B", statut: "Actif (5$/mois)" }
+        ];
+
+        function chargerDonneesAdmin() {
+            document.getElementById('adminTotalAbonnes').innerText = listeAbonnes.length;
+            document.getElementById('adminMrr').innerText = (listeAbonnes.length * 5).toFixed(2) + " $";
+            document.getElementById('adminTotalCodes').innerText = codesLicences.length;
+
+            // Tableau codes
+            const tCodes = document.getElementById('tableauCodesLicences');
+            tCodes.innerHTML = '';
+            codesLicences.forEach((c, idx) => {
+                tCodes.innerHTML += `
+                    <tr class="border-b border-slate-700/60">
+                        <td class="p-3 text-emerald-300 font-bold">${c.code}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] ${c.statut === 'Disponible' ? 'bg-emerald-900 text-emerald-200' : 'bg-slate-700 text-slate-400'}">${c.statut}</span></td>
+                        <td class="p-3"><button onclick="supprimerCode(${idx})" class="text-rose-400 hover:text-rose-300 font-bold">Supprimer</button></td>
+                    </tr>
+                `;
+            });
+
+            // Tableau abonnés
+            const tAbonnes = document.getElementById('tableauAbonnesAdmin');
+            tAbonnes.innerHTML = '';
+            listeAbonnes.forEach((a, idx) => {
+                tAbonnes.innerHTML += `
+                    <tr class="border-b border-slate-700/60">
+                        <td class="p-3 font-bold">${a.nom}</td>
+                        <td class="p-3 font-mono text-slate-400">${a.nif}</td>
+                        <td class="p-3"><span class="bg-emerald-900 text-emerald-200 px-2 py-0.5 rounded text-[10px]">${a.statut}</span></td>
+                        <td class="p-3"><button onclick="revoquerAbonnement(${idx})" class="text-rose-400 hover:text-rose-300 font-bold">Révoquer</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function genererNouveauCodeLicence() {
+            const nouveauCode = "PHARMA-2026-" + Math.floor(1000 + Math.random() * 9000);
+            codesLicences.push({ code: nouveauCode, statut: "Disponible" });
+            localStorage.setItem('codesLicences', JSON.stringify(codesLicences));
+            chargerDonneesAdmin();
+        }
+
+        function supprimerCode(idx) {
+            codesLicences.splice(idx, 1);
+            localStorage.setItem('codesLicences', JSON.stringify(codesLicences));
+            chargerDonneesAdmin();
+        }
+
+        function revoquerAbonnement(idx) {
+            if(confirm("Voulez-vous révoquer l'accès de cette pharmacie ?")) {
+                listeAbonnes.splice(idx, 1);
+                localStorage.setItem('listeAbonnes', JSON.stringify(listeAbonnes));
+                chargerDonneesAdmin();
+            }
+        }
+
+        // Paiement et activation client
+        function selectionnerModePaiement(mode) {
+            document.getElementById('formMobileMoney').classList.add('hidden');
+            document.getElementById('formCarteBancaire').classList.add('hidden');
+            document.getElementById('formCodeLicence').classList.add('hidden');
+
+            document.getElementById('btnMobile').className = "p-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 text-xs font-bold transition flex flex-col items-center gap-1.5";
+            document.getElementById('btnCarte').className = "p-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 text-xs font-bold transition flex flex-col items-center gap-1.5";
+            document.getElementById('btnCode').className = "p-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 text-xs font-bold transition flex flex-col items-center gap-1.5";
+
+            if(mode === 'mobile') {
+                document.getElementById('formMobileMoney').classList.remove('hidden');
+                document.getElementById('btnMobile').className = "p-3.5 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 text-xs font-bold transition flex flex-col items-center gap-1.5";
+            } else if(mode === 'carte') {
+                document.getElementById('formCarteBancaire').classList.remove('hidden');
+                document.getElementById('btnCarte').className = "p-3.5 rounded-2xl border-2 border-blue-600 bg-blue-50 text-blue-900 text-xs font-bold transition flex flex-col items-center gap-1.5";
+            } else if(mode === 'code') {
+                document.getElementById('formCodeLicence').classList.remove('hidden');
+                document.getElementById('btnCode').className = "p-3.5 rounded-2xl border-2 border-indigo-600 bg-indigo-50 text-indigo-900 text-xs font-bold transition flex flex-col items-center gap-1.5";
+            }
+        }
+
+        function simulerPaiementMobile() {
+            const num = document.getElementById('numTelephoneAbonnement').value.trim();
+            if(!num) { alert("Entrez votre numéro de téléphone."); return; }
+            activerAbonnementReussi("Mobile Money (" + num + ")");
+        }
+        function simulerPaiementCarte() {
+            activerAbonnementReussi("Carte Bancaire");
+        }
+        function verifierCodeLicence() {
+            const codeSaisi = document.getElementById('inputCodePrepaye').value.trim().toUpperCase();
+            const trouve = codesLicences.find(c => c.code === codeSaisi && c.statut === 'Disponible');
+            if(!trouve) { alert("Code de licence invalide ou déjà utilisé !"); return; }
+            trouve.statut = 'Utilisé';
+            localStorage.setItem('codesLicences', JSON.stringify(codesLicences));
+            activerAbonnementReussi("Code Licence (" + codeSaisi + ")");
+        }
+
+        function activerAbonnementReussi(methode) {
+            localStorage.setItem('statutAbonnement', 'actif');
+            statutAbonnement = 'actif';
+            // Ajouter aux abonnés admin
+            listeAbonnes.push({ nom: profilOfficine.nom, nif: profilOfficine.nif, statut: "Actif via " + methode });
+            localStorage.setItem('listeAbonnes', JSON.stringify(listeAbonnes));
+            verifierAccesAbonnement();
+        }
+
+        function deconnexionAbonnement() {
+            if(confirm("Verrouiller la session ?")) {
+                localStorage.removeItem('statutAbonnement');
+                statutAbonnement = 'inactif';
+                verifierAccesAbonnement();
+            }
+        }
+
+        // Logique Officine
+        let profilOfficine = JSON.parse(localStorage.getItem('profilOfficineAdmin')) || {
+            nom: "PHARMACIE EXCELLENCE",
+            adresse: "Avenue du Commerce N° 12, Kinshasa",
+            nif: "A24001234B"
+        };
+
+        function appliquerIdentiteOfficine() {
+            document.title = profilOfficine.nom + " - Logiciel Officinal";
+            document.getElementById('headerNomPharmacie').innerText = profilOfficine.nom;
+            document.getElementById('headerSousTitre').innerText = profilOfficine.adresse;
+            document.getElementById('factureNomPharmacie').innerText = profilOfficine.nom;
+            document.getElementById('factureAdressePharmacie').innerText = profilOfficine.adresse;
+            document.getElementById('factureNif').innerText = "NIF: " + profilOfficine.nif;
+        }
+
+        function ouvrirParametresOfficine() {
+            document.getElementById('inputNomPharmacie').value = profilOfficine.nom;
+            document.getElementById('inputAdressePharmacie').value = profilOfficine.adresse;
+            document.getElementById('inputNif').value = profilOfficine.nif;
+            document.getElementById('modaleParametres').classList.remove('hidden');
+        }
+        function fermerParametresOfficine() { document.getElementById('modaleParametres').classList.add('hidden'); }
+        function sauvegarderIdentiteOfficine() {
+            profilOfficine = {
+                nom: document.getElementById('inputNomPharmacie').value.trim().toUpperCase() || "PHARMACIE",
+                adresse: document.getElementById('inputAdressePharmacie').value.trim() || "Kinshasa",
+                nif: document.getElementById('inputNif').value.trim() || "A00000"
+            };
+            localStorage.setItem('profilOfficineAdmin', JSON.stringify(profilOfficine));
+            appliquerIdentiteOfficine();
+            fermerParametresOfficine();
+        }
+
+        const catalogueMedicaments = [
+            { nom: "Paracétamol 500mg (Comprimés)", prixUsd: 0.50 },
+            { nom: "Amoxicilline 500mg (Gélules)", prixUsd: 2.00 },
+            { nom: "Artemether + Lumefantrine (Paludisme)", prixUsd: 3.50 },
+            { nom: "Ibuprofène 400mg (Comprimés)", prixUsd: 0.80 },
+            { nom: "Oméprazole 20mg (Gélules)", prixUsd: 1.50 }
+        ];
+
+        let tauxChange = parseFloat(localStorage.getItem('taux')) || 2850;
+        document.getElementById('tauxChange').value = tauxChange;
+
+        let stocks = JSON.parse(localStorage.getItem('stocksAdmin')) || [
+            { id: 1, nom: "Paracétamol 500mg (Comprimés)", lot: "LOTA22", qte: 50, exp: "2027-08-15", prixUsd: 0.50 },
+            { id: 2, nom: "Amoxicilline 500mg (Gélules)", lot: "LOTB99", qte: 12, exp: "2026-12-15", prixUsd: 2.00 }
+        ];
+
+        let ventesHistorique = JSON.parse(localStorage.getItem('ventesAdmin')) || [];
+
+        function initialiserCatalogueSelect() {
+            const selectCat = document.getElementById('selectCatalogue');
+            selectCat.innerHTML = '<option value="">-- Sélectionner un médicament de référence --</option>';
+            catalogueMedicaments.forEach((med, index) => {
+                selectCat.innerHTML += `<option value="${index}">${med.nom} (~$${med.prixUsd})</option>`;
+            });
+        }
+
+        function remplissageAutomatiqueCatalogue() {
+            const index = document.getElementById('selectCatalogue').value;
+            if(index === "") return;
+            const med = catalogueMedicaments[index];
+            document.getElementById('nomProduit').value = med.nom;
+            document.getElementById('prixUsd').value = med.prixUsd;
+            document.getElementById('numLot').value = "LOT-" + Math.floor(10000 + Math.random() * 90000);
+            document.getElementById('qteStock').value = 50;
+        }
+
+        function mettreAJourTaux() {
+            tauxChange = parseFloat(document.getElementById('tauxChange').value) || 2850;
+            localStorage.setItem('taux', tauxChange);
+            calculerTotalVente();
+            mettreAJourKPIs();
+        }
+
+        function sauvegarderEtAfficher() {
+            localStorage.setItem('stocksAdmin', JSON.stringify(stocks));
+            localStorage.setItem('ventesAdmin', JSON.stringify(ventesHistorique));
+            afficherStocks();
+            remplirSelectProduits();
+            mettreAJourKPIs();
+        }
+
+        function evaluerPeremption(dateExp) {
+            const aujourdHui = new Date();
+            const expiration = new Date(dateExp);
+            const diffJours = Math.ceil((expiration - aujourdHui) / (1000 * 3600 * 24));
+            if (diffJours <= 0 || (diffJours/30.43) <= 1) return { estAlerte: true, classe: "bg-rose-100 text-rose-700 font-bold" };
+            return { estAlerte: false, classe: "bg-emerald-100 text-emerald-800" };
+        }
+
+        function mettreAJourKPIs() {
+            let totalUsdJour = 0;
+            ventesHistorique.forEach(v => { totalUsdJour += parseFloat(v.totalUsd); });
+            let totalCdfJour = totalUsdJour * tauxChange;
+            let alertes = 0;
+            stocks.forEach(s => { if(evaluerPeremption(s.exp).estAlerte) alertes++; });
+
+            document.getElementById('kpiCaUsd').innerText = totalUsdJour.toFixed(2) + " $";
+            document.getElementById('kpiCaCdf').innerText = totalCdfJour.toLocaleString() + " CDF";
+            document.getElementById('kpiTotalVentes').innerText = ventesHistorique.length;
+            document.getElementById('kpiAlertes').innerText = alertes;
+        }
+
+        function afficherStocks() {
+            const tbody = document.getElementById('tableauStock');
+            tbody.innerHTML = '';
+            stocks.forEach(item => {
+                const etat = evaluerPeremption(item.exp);
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3.5 font-medium">${item.nom}</td>
+                        <td class="p-3.5 font-mono text-slate-500">${item.lot}</td>
+                        <td class="p-3.5 font-bold text-emerald-700">${item.qte}</td>
+                        <td class="p-3.5 text-slate-600">${item.exp}</td>
+                        <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] ${etat.classe}">${etat.estAlerte ? 'Alerte' : 'Conforme'}</span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function remplirSelectProduits() {
+            const select = document.getElementById('selectProduit');
+            select.innerHTML = '<option value="">-- Choisir un médicament en stock --</option>';
+            stocks.forEach((item, index) => {
+                if(item.qte > 0) {
+                    select.innerHTML += `<option value="${index}">${item.nom} (Stock: ${item.qte}) - $${item.prixUsd}</option>`;
+                }
+            });
+        }
+
+        function ajouterProduitStock() {
+            const nom = document.getElementById('nomProduit').value;
+            const lot = document.getElementById('numLot').value;
+            const qte = parseInt(document.getElementById('qteStock').value);
+            const exp = document.getElementById('dateExp').value;
+            const prixUsd = parseFloat(document.getElementById('prixUsd').value);
+            if(!nom || !lot || !qte || !exp || isNaN(prixUsd)) { alert("Remplissez tous les champs."); return; }
+            stocks.push({ id: Date.now(), nom, lot, qte, exp, prixUsd });
+            sauvegarderEtAfficher();
+            document.getElementById('selectCatalogue').value = "";
+            document.getElementById('nomProduit').value = '';
+            document.getElementById('numLot').value = '';
+            document.getElementById('qteStock').value = '';
+            document.getElementById('dateExp').value = '';
+            document.getElementById('prixUsd').value = '';
+        }
+
+        function chargerPrixProduit() {
+            const index = document.getElementById('selectProduit').value;
+            if(index === "") { document.getElementById('posPrixUsd').value = ''; return; }
+            document.getElementById('posPrixUsd').value = stocks[index].prixUsd;
+            calculerTotalVente();
+        }
+
+        function calculerTotalVente() {
+            const index = document.getElementById('selectProduit').value;
+            const qte = parseInt(document.getElementById('posQte').value) || 1;
+            const tauxTva = parseFloat(document.getElementById('regimeTva').value) || 0;
+            if(index === "") return;
+
+            const produit = stocks[index];
+            const totalTtcUsd = produit.prixUsd * qte;
+            const totalHtUsd = totalTtcUsd / (1 + (tauxTva / 100));
+            const montantTvaUsd = totalTtcUsd - totalHtUsd;
+            const totalCdf = totalTtcUsd * tauxChange;
+
+            document.getElementById('apercuHt').innerText = totalHtUsd.toFixed(2) + " $";
+            document.getElementById('apercuTva').innerText = montantTvaUsd.toFixed(2) + " $";
+            document.getElementById('totalUsdAffichage').innerText = totalTtcUsd.toFixed(2) + " $";
+            document.getElementById('totalCdfAffichage').innerText = totalCdf.toLocaleString() + " CDF";
+        }
+
+        function validerVenteEtGenererFacture() {
+            const index = document.getElementById('selectProduit').value;
+            const qteVendue = parseInt(document.getElementById('posQte').value) || 1;
+            const devise = document.getElementById('devisePaiement').value;
+            const montantRecu = parseFloat(document.getElementById('montantRecu').value);
+            const clientNom = document.getElementById('clientNom').value.trim() || "Passager";
+            const tauxTva = parseFloat(document.getElementById('regimeTva').value) || 0;
+
+            if(index === "") { alert("Sélectionnez un produit."); return; }
+            const produit = stocks[index];
+            if(qteVendue > produit.qte) { alert("Stock insuffisant !"); return; }
+
+            const totalTtcUsd = produit.prixUsd * qteVendue;
+            const totalHtUsd = totalTtcUsd / (1 + (tauxTva / 100));
+            const montantTvaUsd = totalTtcUsd - totalHtUsd;
+            const totalCdf = totalTtcUsd * tauxChange;
+
+            if(isNaN(montantRecu)) { alert("Entrez un montant perçu."); return; }
+
+            let monnaieTexte = "";
+            if(devise === 'USD') {
+                if(montantRecu < totalTtcUsd) { alert("Montant insuffisant."); return; }
+                let mUsd = montantRecu - totalTtcUsd;
+                monnaieTexte = `${mUsd.toFixed(2)} $ (${(mUsd * tauxChange).toLocaleString()} CDF)`;
+            } else {
+                if(montantRecu < totalCdf) { alert("Montant insuffisant."); return; }
+                let mCdf = montantRecu - totalCdf;
+                monnaieTexte = `${mCdf.toLocaleString()} CDF (${(mCdf / tauxChange).toFixed(2)} $)`;
+            }
+
+            stocks[index].qte -= qteVendue;
+
+            const nouvelleVente = {
+                numFacture: "FAC-" + Math.floor(10000 + Math.random() * 90000),
+                date: new Date().toLocaleString(),
+                client: clientNom,
+                nomProduit: produit.nom,
+                totalHt: totalHtUsd.toFixed(2),
+                montantTva: montantTvaUsd.toFixed(2),
+                totalUsd: totalTtcUsd.toFixed(2),
+                totalCdf: totalCdf.toLocaleString(),
+                devise: devise,
+                montantRecu: montantRecu.toLocaleString() + " " + devise,
+                monnaieRendue: monnaieTexte
+            };
+
+            ventesHistorique.unshift(nouvelleVente);
+            sauvegarderEtAfficher();
+            afficherFacturePopup(nouvelleVente);
+        }
+
+        function afficherFacturePopup(v) {
+            document.getElementById('factureNum').innerText = v.numFacture;
+            document.getElementById('factureTaux').innerText = tauxChange.toLocaleString();
+            document.getElementById('factureClientNom').innerText = v.client;
+            document.getElementById('factureLignes').innerHTML = `
+                <tr>
+                    <td class="py-1"><strong>${v.nomProduit}</strong></td>
+                    <td class="py-1 text-center">1</td>
+                    <td class="py-1 text-right font-bold">${v.totalUsd} $</td>
+                </tr>
+            `;
+            document.getElementById('factureTotalHt').innerText = v.totalHt + " $";
+            document.getElementById('factureMontantTva').innerText = v.montantTva + " $";
+            document.getElementById('factureTotalUsd').innerText = v.totalUsd + " $";
+            document.getElementById('factureTotalCdf').innerText = v.totalCdf + " CDF";
+            document.getElementById('factureDevisePaiement').innerText = v.devise;
+            document.getElementById('factureMontantRecu').innerText = v.montantRecu;
+            document.getElementById('factureMonnaieRendue').innerText = v.monnaieRendue;
+
+            document.getElementById('qrcode').innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), {
+                text: `NIF:${profilOfficine.nif}|FAC:${v.numFacture}|TTC:${v.totalUsd}USD`,
+                width: 65, height: 65
+            });
+            document.getElementById('sectionFactureImpression').classList.remove('hidden');
+        }
+
+        function imprimerFactureActuelle() { window.print(); }
+        function fermerFacture() { document.getElementById('sectionFactureImpression').classList.add('hidden'); }
+
+        // Démarrage
+        verifierAccesAbonnement();
+        appliquerIdentiteOfficine();
+        initialiserCatalogueSelect();
+        sauvegarderEtAfficher();
+    </script>
+</body>
+</html>
