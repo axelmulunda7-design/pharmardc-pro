@@ -6,6 +6,7 @@
     <title>PharmaRDC Pro - Gestion & Administration SaaS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -52,19 +53,19 @@
                 <div class="border-b border-slate-100 pb-2 flex justify-between items-center">
                     <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Choisissez votre mode d'accès :</h4>
                     <!-- Bouton Accès Admin Rapide -->
-                    <button onclick="ouvrirConnexionAdmin()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold underline">
+                    <button type="button" onclick="ouvrirConnexionAdmin()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold underline">
                         🔐 Accès Administrateur SaaS
                     </button>
                 </div>
 
                 <div class="grid grid-cols-3 gap-3">
-                    <button onclick="selectionnerModePaiement('mobile')" id="btnMobile" class="p-3.5 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 text-xs font-bold transition flex flex-col items-center gap-1.5">
+                    <button type="button" onclick="selectionnerModePaiement('mobile')" id="btnMobile" class="p-3.5 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 text-xs font-bold transition flex flex-col items-center gap-1.5">
                         <span class="text-xl">📱</span> Mobile Money
                     </button>
-                    <button onclick="selectionnerModePaiement('carte')" id="btnCarte" class="p-3.5 rounded-2xl border-2 border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-bold transition flex flex-col items-center gap-1.5">
+                    <button type="button" onclick="selectionnerModePaiement('carte')" id="btnCarte" class="p-3.5 rounded-2xl border-2 border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-bold transition flex flex-col items-center gap-1.5">
                         <span class="text-xl">💳</span> Carte Bancaire
                     </button>
-                    <button onclick="selectionnerModePaiement('code')" id="btnCode" class="p-3.5 rounded-2xl border-2 border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-bold transition flex flex-col items-center gap-1.5">
+                    <button type="button" onclick="selectionnerModePaiement('code')" id="btnCode" class="p-3.5 rounded-2xl border-2 border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-bold transition flex flex-col items-center gap-1.5">
                         <span class="text-xl">🔑</span> Code Licence
                     </button>
                 </div>
@@ -80,7 +81,7 @@
                         </select>
                         <input type="text" id="numTelephoneAbonnement" placeholder="Numéro (ex: 810000000)" class="col-span-2 bg-white border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800">
                     </div>
-                    <button onclick="simulerPaiementMobile()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-extrabold text-xs transition shadow-md">
+                    <button type="button" onclick="simulerPaiementMobile()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-extrabold text-xs transition shadow-md">
                         Payer 5 $ & Activer mon Compte 🚀
                     </button>
                 </div>
@@ -92,7 +93,7 @@
                         <input type="text" placeholder="MM / AA" class="bg-white border border-slate-200 rounded-xl p-2.5 text-xs">
                         <input type="text" placeholder="CVV" class="bg-white border border-slate-200 rounded-xl p-2.5 text-xs">
                     </div>
-                    <button onclick="simulerPaiementCarte()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-extrabold text-xs transition shadow-md">
+                    <button type="button" onclick="simulerPaiementCarte()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-extrabold text-xs transition shadow-md">
                         Valider le Paiement 💳
                     </button>
                 </div>
@@ -100,7 +101,7 @@
                 <div id="formCodeLicence" class="hidden bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
                     <p class="text-xs font-semibold text-slate-600">Entrez le code prépayé fourni par l'administrateur :</p>
                     <input type="text" id="inputCodePrepaye" placeholder="EX: PHARMA-2026-XXXX" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs font-mono uppercase text-slate-800 font-bold">
-                    <button onclick="verifierCodeLicence()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-extrabold text-xs transition shadow-md">
+                    <button type="button" onclick="verifierCodeLicence()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-extrabold text-xs transition shadow-md">
                         Activer avec le Code 🔑
                     </button>
                 </div>
@@ -116,10 +117,10 @@
                 <h3 class="text-base font-extrabold mt-1">Accès Super-Administrateur</h3>
                 <p class="text-xs text-slate-500">Entrez le mot de passe maître SaaS</p>
             </div>
-            <input type="password" id="inputAdminPassword" placeholder="Mot de passe admin" class="w-full bg-slate-50 border rounded-xl p-3 text-sm text-center font-bold tracking-widest focus:outline-none focus:border-indigo-600">
+            <input type="password" id="inputAdminPassword" placeholder="Mot de passe admin" onkeydown="if(event.key==='Enter') validerConnexionAdmin()" class="w-full bg-slate-50 border rounded-xl p-3 text-sm text-center font-bold tracking-widest focus:outline-none focus:border-indigo-600">
             <div class="flex gap-2">
-                <button onclick="validerConnexionAdmin()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-xs">Se Connecter</button>
-                <button onclick="fermerConnexionAdmin()" class="bg-slate-100 px-4 py-3 rounded-xl text-xs font-semibold">Annuler</button>
+                <button type="button" onclick="validerConnexionAdmin()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-xs">Se Connecter</button>
+                <button type="button" onclick="fermerConnexionAdmin()" class="bg-slate-100 px-4 py-3 rounded-xl text-xs font-semibold">Annuler</button>
             </div>
         </div>
     </div>
@@ -133,10 +134,10 @@
                     <p class="text-xs text-slate-400">Gestion centrale des pharmacies abonnées (5 $/mois) & licences</p>
                 </div>
                 <div class="flex gap-3">
-                    <button onclick="fermerAdminDashboard()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition">
+                    <button type="button" onclick="fermerAdminDashboard()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition">
                         🖥️ Accéder à l'Application Officine
                     </button>
-                    <button onclick="deconnexionAdmin()" class="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition">
+                    <button type="button" onclick="deconnexionAdmin()" class="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition">
                         🔒 Quitter Admin
                     </button>
                 </div>
@@ -165,7 +166,7 @@
                         <h3 class="text-base font-bold">🔑 Générateur de Codes de Licence (Prépayés 1 Mois)</h3>
                         <p class="text-xs text-slate-400">Générez des codes uniques pour vos clients qui paient en espèces ou hors ligne</p>
                     </div>
-                    <button onclick="genererNouveauCodeLicence()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs">
+                    <button type="button" onclick="genererNouveauCodeLicence()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs">
                         + Générer un Code Licence
                     </button>
                 </div>
@@ -212,13 +213,13 @@
 
             <div class="flex items-center gap-3">
                 <!-- Bouton pour basculer vers le Dashboard Admin -->
-                <button onclick="ouvrirAdminDashboard()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3.5 py-2 rounded-2xl text-xs font-bold transition">
+                <button type="button" onclick="ouvrirAdminDashboard()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3.5 py-2 rounded-2xl text-xs font-bold transition">
                     👑 Panneau Admin SaaS
                 </button>
-                <button onclick="ouvrirParametresOfficine()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border px-3.5 py-2 rounded-2xl text-xs font-bold transition">
+                <button type="button" onclick="ouvrirParametresOfficine()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border px-3.5 py-2 rounded-2xl text-xs font-bold transition">
                     ⚙️ Paramètres Fiscaux
                 </button>
-                <button onclick="deconnexionAbonnement()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border px-3.5 py-2 rounded-2xl text-xs font-bold transition">
+                <button id="btnVerrouiller" type="button" onclick="deconnexionAbonnement()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border px-3.5 py-2 rounded-2xl text-xs font-bold transition">
                     🔒 Verrouiller
                 </button>
 
@@ -266,7 +267,7 @@
                 <section class="xl:col-span-7 bg-white border rounded-3xl p-6 shadow-sm flex flex-col">
                     <div class="flex justify-between items-center mb-5 pb-4 border-b">
                         <h2 class="text-base font-bold">📦 Entrée de Stock Automatisée</h2>
-                        <button onclick="exporterStocksCSV()" class="bg-slate-100 text-xs px-4 py-2.5 rounded-xl font-semibold border">📥 Exporter Excel</button>
+                        <button type="button" onclick="exporterStocksCSV()" class="bg-slate-100 text-xs px-4 py-2.5 rounded-xl font-semibold border">📥 Exporter Excel</button>
                     </div>
                     
                     <div class="bg-slate-50 border p-4 rounded-2xl mb-5 space-y-3.5">
@@ -280,7 +281,7 @@
                             <input type="date" id="dateExp" class="bg-white border text-sm rounded-xl px-3.5 py-2.5">
                             <input type="number" step="0.01" id="prixUsd" placeholder="Prix ($)" class="bg-white border text-sm rounded-xl px-3.5 py-2.5 sm:col-span-1 lg:col-span-2">
                         </div>
-                        <button onclick="ajouterProduitStock()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold text-sm">+ Ajouter au Stock</button>
+                        <button type="button" onclick="ajouterProduitStock()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold text-sm">+ Ajouter au Stock</button>
                     </div>
 
                     <div class="flex-1 overflow-x-auto rounded-2xl border max-h-[300px]">
@@ -336,7 +337,7 @@
                         </div>
                     </div>
 
-                    <button onclick="validerVenteEtGenererFacture()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-extrabold text-sm shadow-md">
+                    <button type="button" onclick="validerVenteEtGenererFacture()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-extrabold text-sm shadow-md">
                         Émettre Facture Normalisée & QR Code 🖨️
                     </button>
                 </section>
@@ -354,8 +355,8 @@
                 <input type="text" id="inputNif" placeholder="NIF" class="w-full bg-slate-50 border rounded-xl p-2.5">
             </div>
             <div class="flex gap-2">
-                <button onclick="sauvegarderIdentiteOfficine()" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold text-xs">Enregistrer</button>
-                <button onclick="fermerParametresOfficine()" class="bg-slate-100 px-4 py-3 rounded-xl text-xs font-semibold">Annuler</button>
+                <button type="button" onclick="sauvegarderIdentiteOfficine()" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold text-xs">Enregistrer</button>
+                <button type="button" onclick="fermerParametresOfficine()" class="bg-slate-100 px-4 py-3 rounded-xl text-xs font-semibold">Annuler</button>
             </div>
         </div>
     </div>
@@ -404,19 +405,80 @@
             </div>
 
             <div class="flex gap-2">
-                <button onclick="imprimerFactureActuelle()" class="flex-1 bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-xs">Imprimer</button>
-                <button onclick="fermerFacture()" class="bg-slate-100 px-4 py-2.5 rounded-xl text-xs font-semibold">Fermer</button>
+                <button type="button" onclick="imprimerFactureActuelle()" class="flex-1 bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-xs">Imprimer</button>
+                <button type="button" onclick="fermerFacture()" class="bg-slate-100 px-4 py-2.5 rounded-xl text-xs font-semibold">Fermer</button>
             </div>
         </div>
     </div>
 
     <!-- Script SaaS Super-Admin -->
     <script>
+        // CONFIGURATION SUPABASE (remplacez les 2 valeurs ci-dessous dès que prêt)
+        const SUPABASE_URL = "VOTRE_PROJECT_URL_ICI";
+        const SUPABASE_ANON_KEY = "VOTRE_ANON_KEY_ICI";
+
+        const supabaseActif =
+            window.supabase &&
+            SUPABASE_URL &&
+            SUPABASE_ANON_KEY &&
+            !SUPABASE_URL.includes("VOTRE_PROJECT_URL_ICI") &&
+            !SUPABASE_ANON_KEY.includes("VOTRE_ANON_KEY_ICI");
+
+        const supabaseClient = supabaseActif
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null;
+
         // GESTION ABONNEMENT ET ADMIN
         let statutAbonnement = localStorage.getItem('statutAbonnement') || 'inactif';
+        let estConnecteAdmin = localStorage.getItem('estConnecteAdmin') === 'true';
+        let codeLicenceActif = localStorage.getItem('codeLicenceActif') || '';
 
-        function verifierAccesAbonnement() {
-            if(statutAbonnement === 'actif') {
+        let codesLicences = JSON.parse(localStorage.getItem('codesLicences')) || [
+            { id: 1, code: "PHARMA-2026-A101", statut: "Disponible", actif: true },
+            { id: 2, code: "PHARMA-2026-B202", statut: "Utilisé", actif: false },
+            { id: 3, code: "PHARMA-2026-C303", statut: "Disponible", actif: true }
+        ];
+
+        let listeAbonnes = JSON.parse(localStorage.getItem('listeAbonnes')) || [
+            { id: 1, nom: "PHARMACIE EXCELLENCE", nif: "A24001234B", statut_abonnement: "Actif (5$/mois)", actif: true }
+        ];
+
+        function sauvegarderLocalLicencesAbonnes() {
+            localStorage.setItem('codesLicences', JSON.stringify(codesLicences));
+            localStorage.setItem('listeAbonnes', JSON.stringify(listeAbonnes));
+        }
+
+        async function verifierAccesAbonnement() {
+            const btnVerrouiller = document.getElementById('btnVerrouiller');
+            if (btnVerrouiller) {
+                if (estConnecteAdmin) {
+                    btnVerrouiller.classList.remove('hidden');
+                } else {
+                    btnVerrouiller.classList.add('hidden');
+                }
+            }
+
+            if (!estConnecteAdmin && statutAbonnement === 'actif' && codeLicenceActif && supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('licences')
+                        .select('actif, date_expiration')
+                        .eq('code', codeLicenceActif)
+                        .single();
+
+                    if (!error && data) {
+                        const expiree = data.date_expiration && new Date(data.date_expiration) < new Date();
+                        if (!data.actif || expiree) {
+                            statutAbonnement = 'inactif';
+                            localStorage.setItem('statutAbonnement', 'inactif');
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Vérification Supabase impossible, repli local :", e);
+                }
+            }
+
+            if (statutAbonnement === 'actif' || estConnecteAdmin) {
                 document.getElementById('sectionAbonnement').classList.add('hidden');
                 document.getElementById('applicationPrincipale').classList.remove('hidden');
             } else {
@@ -428,15 +490,22 @@
         // ESPACE ADMIN
         function ouvrirConnexionAdmin() {
             document.getElementById('modaleAdminLogin').classList.remove('hidden');
+            setTimeout(() => {
+                const inp = document.getElementById('inputAdminPassword');
+                if (inp) inp.focus();
+            }, 50);
         }
         function fermerConnexionAdmin() {
             document.getElementById('modaleAdminLogin').classList.add('hidden');
         }
         function validerConnexionAdmin() {
             const mdp = document.getElementById('inputAdminPassword').value;
-            // Mot de passe Super-Admin (modifiable selon vos besoins)
-            if(mdp === "admin2026") {
+            if (mdp === "admin2026") {
+                estConnecteAdmin = true;
+                localStorage.setItem('estConnecteAdmin', 'true');
+                document.getElementById('inputAdminPassword').value = '';
                 fermerConnexionAdmin();
+                verifierAccesAbonnement();
                 ouvrirAdminDashboard();
             } else {
                 alert("Mot de passe administrateur incorrect.");
@@ -444,81 +513,138 @@
         }
 
         function ouvrirAdminDashboard() {
+            estConnecteAdmin = true;
+            localStorage.setItem('estConnecteAdmin', 'true');
+            verifierAccesAbonnement();
             document.getElementById('sectionAdminDashboard').classList.remove('hidden');
             chargerDonneesAdmin();
         }
         function fermerAdminDashboard() {
             document.getElementById('sectionAdminDashboard').classList.add('hidden');
+            verifierAccesAbonnement();
         }
         function deconnexionAdmin() {
+            estConnecteAdmin = false;
+            localStorage.removeItem('estConnecteAdmin');
             fermerAdminDashboard();
+            verifierAccesAbonnement();
         }
 
-        let codesLicences = JSON.parse(localStorage.getItem('codesLicences')) || [
-            { code: "PHARMA-2026-A101", statut: "Disponible" },
-            { code: "PHARMA-2026-B202", statut: "Utilisé" },
-            { code: "PHARMA-2026-C303", statut: "Disponible" }
-        ];
+        async function chargerDonneesAdmin() {
+            if (supabaseClient) {
+                const { data: licencesData } = await supabaseClient
+                    .from('licences')
+                    .select('*')
+                    .order('id', { ascending: false });
 
-        let listeAbonnes = JSON.parse(localStorage.getItem('listeAbonnes')) || [
-            { nom: "PHARMACIE EXCELLENCE", nif: "A24001234B", statut: "Actif (5$/mois)" }
-        ];
+                const { data: pharmaciesData } = await supabaseClient
+                    .from('pharmacies')
+                    .select('*')
+                    .order('id', { ascending: false });
 
-        function chargerDonneesAdmin() {
-            document.getElementById('adminTotalAbonnes').innerText = listeAbonnes.length;
-            document.getElementById('adminMrr').innerText = (listeAbonnes.length * 5).toFixed(2) + " $";
+                if (licencesData) codesLicences = licencesData;
+                if (pharmaciesData) listeAbonnes = pharmaciesData;
+            }
+
+            const abonnesActifs = listeAbonnes.filter(a => a.actif !== false);
+            document.getElementById('adminTotalAbonnes').innerText = abonnesActifs.length;
+            document.getElementById('adminMrr').innerText = (abonnesActifs.length * 5).toFixed(2) + " $";
             document.getElementById('adminTotalCodes').innerText = codesLicences.length;
 
-            // Tableau codes
             const tCodes = document.getElementById('tableauCodesLicences');
             tCodes.innerHTML = '';
             codesLicences.forEach((c, idx) => {
+                const dispo = c.statut === 'Disponible' && c.actif !== false;
+                const identifiantCode = c.id !== undefined ? c.id : idx;
                 tCodes.innerHTML += `
                     <tr class="border-b border-slate-700/60">
                         <td class="p-3 text-emerald-300 font-bold">${c.code}</td>
-                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] ${c.statut === 'Disponible' ? 'bg-emerald-900 text-emerald-200' : 'bg-slate-700 text-slate-400'}">${c.statut}</span></td>
-                        <td class="p-3"><button onclick="supprimerCode(${idx})" class="text-rose-400 hover:text-rose-300 font-bold">Supprimer</button></td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] ${dispo ? 'bg-emerald-900 text-emerald-200' : 'bg-slate-700 text-slate-400'}">${c.statut}</span></td>
+                        <td class="p-3"><button type="button" onclick="supprimerCode(${identifiantCode})" class="text-rose-400 hover:text-rose-300 font-bold">Supprimer</button></td>
                     </tr>
                 `;
             });
 
-            // Tableau abonnés
             const tAbonnes = document.getElementById('tableauAbonnesAdmin');
             tAbonnes.innerHTML = '';
             listeAbonnes.forEach((a, idx) => {
+                const identifiantAbonne = a.id !== undefined ? a.id : idx;
+                const statutLabel = a.statut_abonnement || a.statut || 'Actif (5$/mois)';
+                const etatBadge = a.actif === false
+                    ? `<span class="bg-rose-900 text-rose-200 px-2 py-0.5 rounded text-[10px]">Révoqué</span>`
+                    : `<span class="bg-emerald-900 text-emerald-200 px-2 py-0.5 rounded text-[10px]">${statutLabel}</span>`;
                 tAbonnes.innerHTML += `
                     <tr class="border-b border-slate-700/60">
                         <td class="p-3 font-bold">${a.nom}</td>
-                        <td class="p-3 font-mono text-slate-400">${a.nif}</td>
-                        <td class="p-3"><span class="bg-emerald-900 text-emerald-200 px-2 py-0.5 rounded text-[10px]">${a.statut}</span></td>
-                        <td class="p-3"><button onclick="revoquerAbonnement(${idx})" class="text-rose-400 hover:text-rose-300 font-bold">Révoquer</button></td>
+                        <td class="p-3 font-mono text-slate-400">${a.nif || '-'}</td>
+                        <td class="p-3">${etatBadge}</td>
+                        <td class="p-3"><button type="button" onclick="revoquerAbonnement(${identifiantAbonne}, '${(a.code_licence || '').replace(/'/g, "\\'")}')" class="text-rose-400 hover:text-rose-300 font-bold">Révoquer</button></td>
                     </tr>
                 `;
             });
         }
 
-        function genererNouveauCodeLicence() {
+        async function genererNouveauCodeLicence() {
             const nouveauCode = "PHARMA-2026-" + Math.floor(1000 + Math.random() * 9000);
-            codesLicences.push({ code: nouveauCode, statut: "Disponible" });
-            localStorage.setItem('codesLicences', JSON.stringify(codesLicences));
+            if (supabaseClient) {
+                const { error } = await supabaseClient
+                    .from('licences')
+                    .insert([{ code: nouveauCode, statut: "Disponible", actif: true }]);
+                if (error) {
+                    alert("Erreur lors de la création du code : " + error.message);
+                    return;
+                }
+            } else {
+                codesLicences.unshift({ id: Date.now(), code: nouveauCode, statut: "Disponible", actif: true });
+                sauvegarderLocalLicencesAbonnes();
+            }
             chargerDonneesAdmin();
         }
 
-        function supprimerCode(idx) {
-            codesLicences.splice(idx, 1);
-            localStorage.setItem('codesLicences', JSON.stringify(codesLicences));
+        async function supprimerCode(idOrIdx) {
+            if (supabaseClient) {
+                const { error } = await supabaseClient
+                    .from('licences')
+                    .delete()
+                    .eq('id', idOrIdx);
+                if (error) {
+                    alert("Erreur lors de la suppression : " + error.message);
+                    return;
+                }
+            } else {
+                const indexTrouve = codesLicences.findIndex((c, i) => (c.id !== undefined ? c.id === idOrIdx : i === idOrIdx));
+                if (indexTrouve > -1) codesLicences.splice(indexTrouve, 1);
+                sauvegarderLocalLicencesAbonnes();
+            }
             chargerDonneesAdmin();
         }
 
-        function revoquerAbonnement(idx) {
-            if(confirm("Voulez-vous révoquer l'accès de cette pharmacie ?")) {
-                listeAbonnes.splice(idx, 1);
-                localStorage.setItem('listeAbonnes', JSON.stringify(listeAbonnes));
+        async function revoquerAbonnement(idOrIdx, codeLie) {
+            if (confirm("Voulez-vous révoquer l'accès de cette pharmacie ?")) {
+                if (supabaseClient) {
+                    await supabaseClient
+                        .from('pharmacies')
+                        .update({ actif: false, statut_abonnement: 'Révoqué' })
+                        .eq('id', idOrIdx);
+
+                    if (codeLie) {
+                        await supabaseClient
+                            .from('licences')
+                            .update({ actif: false })
+                            .eq('code', codeLie);
+                    }
+                } else {
+                    const indexTrouve = listeAbonnes.findIndex((a, i) => (a.id !== undefined ? a.id === idOrIdx : i === idOrIdx));
+                    if (indexTrouve > -1) {
+                        listeAbonnes[indexTrouve].actif = false;
+                        listeAbonnes[indexTrouve].statut_abonnement = 'Révoqué';
+                    }
+                    sauvegarderLocalLicencesAbonnes();
+                }
                 chargerDonneesAdmin();
             }
         }
 
-        // Paiement et activation client
         function selectionnerModePaiement(mode) {
             document.getElementById('formMobileMoney').classList.add('hidden');
             document.getElementById('formCarteBancaire').classList.add('hidden');
@@ -528,13 +654,13 @@
             document.getElementById('btnCarte').className = "p-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 text-xs font-bold transition flex flex-col items-center gap-1.5";
             document.getElementById('btnCode').className = "p-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 text-xs font-bold transition flex flex-col items-center gap-1.5";
 
-            if(mode === 'mobile') {
+            if (mode === 'mobile') {
                 document.getElementById('formMobileMoney').classList.remove('hidden');
                 document.getElementById('btnMobile').className = "p-3.5 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 text-xs font-bold transition flex flex-col items-center gap-1.5";
-            } else if(mode === 'carte') {
+            } else if (mode === 'carte') {
                 document.getElementById('formCarteBancaire').classList.remove('hidden');
                 document.getElementById('btnCarte').className = "p-3.5 rounded-2xl border-2 border-blue-600 bg-blue-50 text-blue-900 text-xs font-bold transition flex flex-col items-center gap-1.5";
-            } else if(mode === 'code') {
+            } else if (mode === 'code') {
                 document.getElementById('formCodeLicence').classList.remove('hidden');
                 document.getElementById('btnCode').className = "p-3.5 rounded-2xl border-2 border-indigo-600 bg-indigo-50 text-indigo-900 text-xs font-bold transition flex flex-col items-center gap-1.5";
             }
@@ -542,39 +668,103 @@
 
         function simulerPaiementMobile() {
             const num = document.getElementById('numTelephoneAbonnement').value.trim();
-            if(!num) { alert("Entrez votre numéro de téléphone."); return; }
+            if (!num) { alert("Entrez votre numéro de téléphone."); return; }
             activerAbonnementReussi("Mobile Money (" + num + ")");
         }
         function simulerPaiementCarte() {
             activerAbonnementReussi("Carte Bancaire");
         }
-        function verifierCodeLicence() {
+
+        async function verifierCodeLicence() {
             const codeSaisi = document.getElementById('inputCodePrepaye').value.trim().toUpperCase();
-            const trouve = codesLicences.find(c => c.code === codeSaisi && c.statut === 'Disponible');
-            if(!trouve) { alert("Code de licence invalide ou déjà utilisé !"); return; }
-            trouve.statut = 'Utilisé';
-            localStorage.setItem('codesLicences', JSON.stringify(codesLicences));
-            activerAbonnementReussi("Code Licence (" + codeSaisi + ")");
+            if (!codeSaisi) {
+                alert("Entrez un code de licence.");
+                return;
+            }
+
+            const dateExp = new Date();
+            dateExp.setDate(dateExp.getDate() + 30);
+
+            if (supabaseClient) {
+                const { data: licence, error } = await supabaseClient
+                    .from('licences')
+                    .select('*')
+                    .eq('code', codeSaisi)
+                    .eq('statut', 'Disponible')
+                    .eq('actif', true)
+                    .single();
+
+                if (error || !licence) {
+                    alert("Code de licence invalide ou déjà utilisé !");
+                    return;
+                }
+
+                await supabaseClient
+                    .from('licences')
+                    .update({
+                        statut: 'Utilisé',
+                        pharmacie_nom: profilOfficine.nom,
+                        date_activation: new Date().toISOString(),
+                        date_expiration: dateExp.toISOString()
+                    })
+                    .eq('id', licence.id);
+            } else {
+                const trouve = codesLicences.find(c => c.code === codeSaisi && c.statut === 'Disponible' && c.actif !== false);
+                if (!trouve) {
+                    alert("Code de licence invalide ou déjà utilisé !");
+                    return;
+                }
+                trouve.statut = 'Utilisé';
+                sauvegarderLocalLicencesAbonnes();
+            }
+
+            localStorage.setItem('codeLicenceActif', codeSaisi);
+            codeLicenceActif = codeSaisi;
+            activerAbonnementReussi("Code Licence (" + codeSaisi + ")", dateExp.toISOString(), codeSaisi);
         }
 
-        function activerAbonnementReussi(methode) {
+        async function activerAbonnementReussi(methode, dateExpirationIso = null, codeUtilise = "") {
             localStorage.setItem('statutAbonnement', 'actif');
             statutAbonnement = 'actif';
-            // Ajouter aux abonnés admin
-            listeAbonnes.push({ nom: profilOfficine.nom, nif: profilOfficine.nif, statut: "Actif via " + methode });
-            localStorage.setItem('listeAbonnes', JSON.stringify(listeAbonnes));
+
+            if (supabaseClient) {
+                await supabaseClient
+                    .from('pharmacies')
+                    .insert([{
+                        nom: profilOfficine.nom,
+                        adresse: profilOfficine.adresse,
+                        nif: profilOfficine.nif,
+                        code_licence: codeUtilise || null,
+                        statut_abonnement: "Actif via " + methode,
+                        date_expiration: dateExpirationIso,
+                        actif: true
+                    }]);
+            } else {
+                listeAbonnes.push({
+                    id: Date.now(),
+                    nom: profilOfficine.nom,
+                    nif: profilOfficine.nif,
+                    code_licence: codeUtilise || null,
+                    statut_abonnement: "Actif via " + methode,
+                    actif: true
+                });
+                sauvegarderLocalLicencesAbonnes();
+            }
+
             verifierAccesAbonnement();
         }
 
         function deconnexionAbonnement() {
-            if(confirm("Verrouiller la session ?")) {
+            if (confirm("Verrouiller la session ?")) {
                 localStorage.removeItem('statutAbonnement');
+                localStorage.removeItem('estConnecteAdmin');
                 statutAbonnement = 'inactif';
+                estConnecteAdmin = false;
                 verifierAccesAbonnement();
             }
         }
 
-        // Logique Officine
+        // PERSONNALISATION & IDENTITÉ OFFICINE
         let profilOfficine = JSON.parse(localStorage.getItem('profilOfficineAdmin')) || {
             nom: "PHARMACIE EXCELLENCE",
             adresse: "Avenue du Commerce N° 12, Kinshasa",
@@ -626,6 +816,29 @@
 
         let ventesHistorique = JSON.parse(localStorage.getItem('ventesAdmin')) || [];
 
+        function exporterStocksCSV() {
+            const lignes = [
+                ["Produit", "Lot", "Quantite", "Expiration", "Prix USD", "Statut"].join(";")
+            ];
+            stocks.forEach(item => {
+                const etat = evaluerPeremption(item.exp);
+                const statutTexte = etat.estAlerte ? "Alerte" : "Conforme";
+                const ligne = [item.nom, item.lot, item.qte, item.exp, item.prixUsd, statutTexte]
+                    .map(val => `"${String(val).replace(/"/g, '""')}"`)
+                    .join(";");
+                lignes.push(ligne);
+            });
+            const blob = new Blob(["\uFEFF" + lignes.join("\n")], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const lien = document.createElement("a");
+            lien.href = url;
+            lien.download = "stock_pharmardc.csv";
+            document.body.appendChild(lien);
+            lien.click();
+            document.body.removeChild(lien);
+            URL.revokeObjectURL(url);
+        }
+
         function initialiserCatalogueSelect() {
             const selectCat = document.getElementById('selectCatalogue');
             selectCat.innerHTML = '<option value="">-- Sélectionner un médicament de référence --</option>';
@@ -636,7 +849,7 @@
 
         function remplissageAutomatiqueCatalogue() {
             const index = document.getElementById('selectCatalogue').value;
-            if(index === "") return;
+            if (index === "") return;
             const med = catalogueMedicaments[index];
             document.getElementById('nomProduit').value = med.nom;
             document.getElementById('prixUsd').value = med.prixUsd;
@@ -663,7 +876,7 @@
             const aujourdHui = new Date();
             const expiration = new Date(dateExp);
             const diffJours = Math.ceil((expiration - aujourdHui) / (1000 * 3600 * 24));
-            if (diffJours <= 0 || (diffJours/30.43) <= 1) return { estAlerte: true, classe: "bg-rose-100 text-rose-700 font-bold" };
+            if (diffJours <= 0 || (diffJours / 30.43) <= 1) return { estAlerte: true, classe: "bg-rose-100 text-rose-700 font-bold" };
             return { estAlerte: false, classe: "bg-emerald-100 text-emerald-800" };
         }
 
@@ -672,7 +885,7 @@
             ventesHistorique.forEach(v => { totalUsdJour += parseFloat(v.totalUsd); });
             let totalCdfJour = totalUsdJour * tauxChange;
             let alertes = 0;
-            stocks.forEach(s => { if(evaluerPeremption(s.exp).estAlerte) alertes++; });
+            stocks.forEach(s => { if (evaluerPeremption(s.exp).estAlerte) alertes++; });
 
             document.getElementById('kpiCaUsd').innerText = totalUsdJour.toFixed(2) + " $";
             document.getElementById('kpiCaCdf').innerText = totalCdfJour.toLocaleString() + " CDF";
@@ -701,7 +914,7 @@
             const select = document.getElementById('selectProduit');
             select.innerHTML = '<option value="">-- Choisir un médicament en stock --</option>';
             stocks.forEach((item, index) => {
-                if(item.qte > 0) {
+                if (item.qte > 0) {
                     select.innerHTML += `<option value="${index}">${item.nom} (Stock: ${item.qte}) - $${item.prixUsd}</option>`;
                 }
             });
@@ -713,7 +926,7 @@
             const qte = parseInt(document.getElementById('qteStock').value);
             const exp = document.getElementById('dateExp').value;
             const prixUsd = parseFloat(document.getElementById('prixUsd').value);
-            if(!nom || !lot || !qte || !exp || isNaN(prixUsd)) { alert("Remplissez tous les champs."); return; }
+            if (!nom || !lot || !qte || !exp || isNaN(prixUsd)) { alert("Remplissez tous les champs."); return; }
             stocks.push({ id: Date.now(), nom, lot, qte, exp, prixUsd });
             sauvegarderEtAfficher();
             document.getElementById('selectCatalogue').value = "";
@@ -726,7 +939,7 @@
 
         function chargerPrixProduit() {
             const index = document.getElementById('selectProduit').value;
-            if(index === "") { document.getElementById('posPrixUsd').value = ''; return; }
+            if (index === "") { document.getElementById('posPrixUsd').value = ''; return; }
             document.getElementById('posPrixUsd').value = stocks[index].prixUsd;
             calculerTotalVente();
         }
@@ -735,7 +948,7 @@
             const index = document.getElementById('selectProduit').value;
             const qte = parseInt(document.getElementById('posQte').value) || 1;
             const tauxTva = parseFloat(document.getElementById('regimeTva').value) || 0;
-            if(index === "") return;
+            if (index === "") return;
 
             const produit = stocks[index];
             const totalTtcUsd = produit.prixUsd * qte;
@@ -757,24 +970,24 @@
             const clientNom = document.getElementById('clientNom').value.trim() || "Passager";
             const tauxTva = parseFloat(document.getElementById('regimeTva').value) || 0;
 
-            if(index === "") { alert("Sélectionnez un produit."); return; }
+            if (index === "") { alert("Sélectionnez un produit."); return; }
             const produit = stocks[index];
-            if(qteVendue > produit.qte) { alert("Stock insuffisant !"); return; }
+            if (qteVendue > produit.qte) { alert("Stock insuffisant !"); return; }
 
             const totalTtcUsd = produit.prixUsd * qteVendue;
             const totalHtUsd = totalTtcUsd / (1 + (tauxTva / 100));
             const montantTvaUsd = totalTtcUsd - totalHtUsd;
             const totalCdf = totalTtcUsd * tauxChange;
 
-            if(isNaN(montantRecu)) { alert("Entrez un montant perçu."); return; }
+            if (isNaN(montantRecu)) { alert("Entrez un montant perçu."); return; }
 
             let monnaieTexte = "";
-            if(devise === 'USD') {
-                if(montantRecu < totalTtcUsd) { alert("Montant insuffisant."); return; }
+            if (devise === 'USD') {
+                if (montantRecu < totalTtcUsd) { alert("Montant insuffisant."); return; }
                 let mUsd = montantRecu - totalTtcUsd;
                 monnaieTexte = `${mUsd.toFixed(2)} $ (${(mUsd * tauxChange).toLocaleString()} CDF)`;
             } else {
-                if(montantRecu < totalCdf) { alert("Montant insuffisant."); return; }
+                if (montantRecu < totalCdf) { alert("Montant insuffisant."); return; }
                 let mCdf = montantRecu - totalCdf;
                 monnaieTexte = `${mCdf.toLocaleString()} CDF (${(mCdf / tauxChange).toFixed(2)} $)`;
             }
