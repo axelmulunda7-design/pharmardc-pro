@@ -943,475 +943,494 @@
     </section>
 
    <script>
-        // Renseignez vos clés Supabase (Project Settings > API)
-        const SUPABASE_URL = "https://cyspkhpkpeajndzvsbjj.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_XCXYwDfRXeIc09Dz38q-gQ_X35Th0Fg";
+    // Renseignez vos clés Supabase (Project Settings > API)
+    const SUPABASE_URL = "";
+    const SUPABASE_ANON_KEY = "";
 
-        const supabaseClient = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
-            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-            : null;
+    const supabaseClient = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
 
-        let utilisateurCourant = null;
-        let roleCourant = "admin"; // En mode local sans Supabase, accès complet pour tester
-        let produits = [
-            { id: "MED-01", nom: "Paracétamol 500 mg (Boîte 20)", stock: 45, prix: 2.50 },
-            { id: "MED-02", nom: "Amoxicilline 500 mg (Gélules x12)", stock: 28, prix: 4.00 },
-            { id: "MED-03", nom: "Artéméther + Luméfantrine (Cure)", stock: 19, prix: 6.50 },
-            { id: "MED-04", nom: "Sérum physiologique 0.9% (500 ml)", stock: 60, prix: 1.80 }
-        ];
-        let panier = [];
+    let utilisateurCourant = null;
+    let roleCourant = "admin";
+    let produits = [
+        { id: "MED-01", nom: "Paracétamol 500 mg (Boîte 20)", stock: 45, prix: 2.50 },
+        { id: "MED-02", nom: "Amoxicilline 500 mg (Gélules x12)", stock: 28, prix: 4.00 },
+        { id: "MED-03", nom: "Artéméther + Luméfantrine (Cure)", stock: 19, prix: 6.50 },
+        { id: "MED-04", nom: "Sérum physiologique 0.9% (500 ml)", stock: 60, prix: 1.80 }
+    ];
+    let panier = [];
 
-        async function initialiserApp() {
-            if (!supabaseClient) {
-                appliquerPermissionsUI();
-                rendreCatalogue();
-                rendrePanier();
-                return;
-            }
+    function echapperHtml(texte) {
+        return String(texte ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
 
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            await gererSession(session);
-
-            supabaseClient.auth.onAuthStateChange((_event, nouvelleSession) => {
-                gererSession(nouvelleSession);
-            });
-        }
-
-        async function gererSession(session) {
-            const vueAuth = document.getElementById("vueAuth");
-            const vuePrincipale = document.getElementById("vuePrincipale");
-            const btnDeco = document.getElementById("btnDeconnexion");
-            const badgeRole = document.getElementById("badgeRole");
-
-            if (!session) {
-                utilisateurCourant = null;
-                vueAuth.classList.remove("hidden");
-                vuePrincipale.classList.add("hidden");
-                btnDeco.classList.add("hidden");
-                badgeRole.classList.add("hidden");
-                return;
-            }
-
-            utilisateurCourant = session.user;
-            vueAuth.classList.add("hidden");
-            vuePrincipale.classList.remove("hidden");
-            btnDeco.classList.remove("hidden");
-            badgeRole.classList.remove("hidden");
-
-            const { data: profil } = await supabaseClient
-                .from("profiles")
-                .select("role, nom_complet")
-                .eq("id", utilisateurCourant.id)
-                .single();
-
-            roleCourant = profil?.role || "caissier";
-            badgeRole.textContent = roleCourant;
+    async function initialiserApp() {
+        if (!supabaseClient) {
+            roleCourant = "admin";
             document.getElementById("infoUtilisateur").textContent =
-                `Connecté : ${profil?.nom_complet || utilisateurCourant.email} (${roleCourant.toUpperCase()})`;
-
+                "Officine — Mode démonstration locale (Supabase non configuré)";
             appliquerPermissionsUI();
-            await chargerProduitsSupabase();
-            if (roleCourant === "admin") {
-                await chargerUtilisateurs();
-            }
+            rendreCatalogue();
             rendrePanier();
+            return;
         }
 
-        function appliquerPermissionsUI() {
-            const panneauAdmin = document.getElementById("panneauAdmin");
-            if (roleCourant === "admin") {
-                panneauAdmin.classList.remove("hidden");
-            } else {
-                panneauAdmin.classList.add("hidden");
-            }
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        if (error) {
+            document.getElementById("authMessage").textContent = error.message;
         }
-        async function connecter() {
-            const msgEl = document.getElementById("authMessage");
-            if (!supabaseClient) {
-                msgEl.textContent = "Supabase n'est pas configuré (SUPABASE_URL / SUPABASE_ANON_KEY manquants).";
-                return;
-            }
-        
-            const email = document.getElementById("authEmail").value.trim();
-            const password = document.getElementById("authPassword").value;
-        
-            if (!email || !password) {
-                msgEl.textContent = "Veuillez saisir votre email et votre mot de passe.";
-                return;
-            }
-        
-            msgEl.textContent = "Connexion en cours...";
-            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            msgEl.textContent = error ? error.message : "";
+        await gererSession(session);
+
+        supabaseClient.auth.onAuthStateChange((_event, nouvelleSession) => {
+            gererSession(nouvelleSession);
+        });
+    }
+
+    async function gererSession(session) {
+        const vueAuth = document.getElementById("vueAuth");
+        const vuePrincipale = document.getElementById("vuePrincipale");
+        const btnDeco = document.getElementById("btnDeconnexion");
+        const badgeRole = document.getElementById("badgeRole");
+
+        if (!session) {
+            utilisateurCourant = null;
+            roleCourant = "caissier";
+            vueAuth.classList.remove("hidden");
+            vuePrincipale.classList.add("hidden");
+            btnDeco.classList.add("hidden");
+            badgeRole.classList.add("hidden");
+            appliquerPermissionsUI();
+            return;
         }
-        
-        async function inscrire() {
-            const msgEl = document.getElementById("authMessage");
-            if (!supabaseClient) {
-                msgEl.textContent = "Supabase n'est pas configuré (SUPABASE_URL / SUPABASE_ANON_KEY manquants).";
-                return;
+
+        utilisateurCourant = session.user;
+        vueAuth.classList.add("hidden");
+        vuePrincipale.classList.remove("hidden");
+        btnDeco.classList.remove("hidden");
+        badgeRole.classList.remove("hidden");
+
+        const { data: profil, error: profilError } = await supabaseClient
+            .from("profiles")
+            .select("role, nom_complet, email")
+            .eq("id", utilisateurCourant.id)
+            .maybeSingle();
+
+        if (profilError) {
+            afficherMessage("Erreur profil : " + profilError.message);
+        }
+
+        roleCourant = profil?.role || "caissier";
+        badgeRole.textContent = roleCourant;
+        const nomAffiche = profil?.nom_complet || profil?.email || utilisateurCourant.email;
+        document.getElementById("infoUtilisateur").textContent =
+            `Connecté : ${nomAffiche} (${roleCourant.toUpperCase()})`;
+
+        appliquerPermissionsUI();
+        await chargerProduitsSupabase();
+        if (roleCourant === "admin") {
+            await chargerUtilisateurs();
+        }
+        rendreCatalogue();
+        rendrePanier();
+    }
+
+    function appliquerPermissionsUI() {
+        const panneauAdmin = document.getElementById("panneauAdmin");
+        if (!panneauAdmin) return;
+        if (roleCourant === "admin") {
+            panneauAdmin.classList.remove("hidden");
+        } else {
+            panneauAdmin.classList.add("hidden");
+        }
+    }
+
+    async function connecter() {
+        const msgEl = document.getElementById("authMessage");
+        if (!supabaseClient) {
+            msgEl.textContent = "Supabase n'est pas configuré (SUPABASE_URL / SUPABASE_ANON_KEY manquants).";
+            return;
+        }
+
+        const email = document.getElementById("authEmail").value.trim();
+        const password = document.getElementById("authPassword").value;
+
+        if (!email || !password) {
+            msgEl.textContent = "Veuillez saisir votre email et votre mot de passe.";
+            return;
+        }
+
+        msgEl.textContent = "Connexion en cours...";
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        msgEl.textContent = error ? error.message : "";
+    }
+
+    async function inscrire() {
+        const msgEl = document.getElementById("authMessage");
+        if (!supabaseClient) {
+            msgEl.textContent = "Supabase n'est pas configuré (SUPABASE_URL / SUPABASE_ANON_KEY manquants).";
+            return;
+        }
+
+        const email = document.getElementById("authEmail").value.trim();
+        const password = document.getElementById("authPassword").value;
+
+        if (!email || password.length < 6) {
+            msgEl.textContent = "Entrez un email valide et un mot de passe d'au moins 6 caractères.";
+            return;
+        }
+
+        msgEl.textContent = "Création du compte en cours...";
+        const { data, error } = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: {
+                data: { nom_complet: email.split("@")[0] }
             }
-        
-            const email = document.getElementById("authEmail").value.trim();
-            const password = document.getElementById("authPassword").value;
-        
-            if (!email || password.length < 6) {
-                msgEl.textContent = "Entrez un email valide et un mot de passe d'au moins 6 caractères.";
-                return;
-            }
-        
-            msgEl.textContent = "Création du compte en cours...";
-            const { data, error } = await supabaseClient.auth.signUp({ email, password });
-        
+        });
+
+        if (error) {
+            msgEl.textContent = error.message;
+            return;
+        }
+
+        if (data?.session) {
+            msgEl.textContent = "Compte créé et connecté.";
+        } else {
+            msgEl.textContent = "Compte créé ! Vérifiez votre boîte mail pour confirmer l'adresse (ou désactivez 'Confirm email' dans Supabase > Authentication > Providers > Email).";
+        }
+    }
+
+    async function deconnecter() {
+        if (!supabaseClient) return;
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+            afficherMessage("Erreur de déconnexion : " + error.message);
+            return;
+        }
+        panier = [];
+        rendrePanier();
+    }
+
+    async function chargerProduitsSupabase() {
+        if (!supabaseClient) return;
+        const { data, error } = await supabaseClient
+            .from("produits")
+            .select("id, nom, stock, prix")
+            .order("id");
+
+        if (error) {
+            afficherMessage("Erreur chargement catalogue : " + error.message);
+            return;
+        }
+
+        if (Array.isArray(data)) {
+            produits = data.map(p => ({
+                id: String(p.id),
+                nom: String(p.nom),
+                stock: Number(p.stock) || 0,
+                prix: Number(p.prix) || 0
+            }));
+            rendreCatalogue();
+        }
+    }
+
+    async function enregistrerProduitAdmin() {
+        if (roleCourant !== "admin") {
+            afficherMessage("Action réservée aux administrateurs.");
+            return;
+        }
+
+        const id = document.getElementById("adminProdId").value.trim().toUpperCase();
+        const nom = document.getElementById("adminProdNom").value.trim();
+        const stock = parseInt(document.getElementById("adminProdStock").value, 10);
+        const prix = parseFloat(document.getElementById("adminProdPrix").value);
+
+        if (!id || !nom || Number.isNaN(stock) || stock < 0 || Number.isNaN(prix) || prix < 0) {
+            afficherMessage("Veuillez saisir un code, un nom, un stock >= 0 et un prix >= 0.");
+            return;
+        }
+
+        if (supabaseClient) {
+            const { error } = await supabaseClient
+                .from("produits")
+                .upsert({ id, nom, stock, prix, updated_at: new Date().toISOString() }, { onConflict: "id" });
+
             if (error) {
-                msgEl.textContent = error.message;
+                afficherMessage("Erreur Supabase : " + error.message);
                 return;
             }
-        
-            if (data?.session) {
-                msgEl.textContent = "Compte créé et connecté.";
-            } else {
-                msgEl.textContent = "Compte créé ! Vérifiez votre boîte mail pour confirmer l'adresse, ou désactivez 'Confirm email' dans Supabase > Authentication > Providers > Email.";
-            }
-        }
-        async function deconnecter() {
-            if (supabaseClient) await supabaseClient.auth.signOut();
+            await chargerProduitsSupabase();
+        } else {
+            const idx = produits.findIndex(p => p.id === id);
+            if (idx >= 0) produits[idx] = { id, nom, stock, prix };
+            else produits.push({ id, nom, stock, prix });
+            rendreCatalogue();
         }
 
-        async function chargerProduitsSupabase() {
-            if (!supabaseClient) return;
-            const { data, error } = await supabaseClient.from("produits").select("*").order("id");
-            if (!error && data) {
-                produits = data;
-                rendreCatalogue();
-            }
+        document.getElementById("adminProdId").value = "";
+        document.getElementById("adminProdNom").value = "";
+        document.getElementById("adminProdStock").value = "";
+        document.getElementById("adminProdPrix").value = "";
+        afficherMessage(`Produit ${id} enregistré.`);
+    }
+
+    async function chargerUtilisateurs() {
+        if (!supabaseClient || roleCourant !== "admin") return;
+
+        const { data, error } = await supabaseClient
+            .from("profiles")
+            .select("id, email, nom_complet, role, created_at")
+            .order("created_at");
+
+        if (error) {
+            afficherMessage("Erreur chargement utilisateurs : " + error.message);
+            return;
         }
 
-        async function enregistrerProduitAdmin() {
-            if (roleCourant !== "admin") return;
-            const id = document.getElementById("adminProdId").value.trim().toUpperCase();
-            const nom = document.getElementById("adminProdNom").value.trim();
-            const stock = parseInt(document.getElementById("adminProdStock").value, 10);
-            const prix = parseFloat(document.getElementById("adminProdPrix").value);
+        const tbody = document.getElementById("listeUtilisateurs");
+        tbody.innerHTML = (data || []).map(u => {
+            const label = echapperHtml(u.email || u.nom_complet || u.id);
+            const roleActuel = u.role === "admin" ? "admin" : "caissier";
+            const prochainRole = roleActuel === "admin" ? "caissier" : "admin";
+            const texteBouton = roleActuel === "admin" ? "Passer Caissier" : "Passer Admin";
+            const estSoiMeme = utilisateurCourant && u.id === utilisateurCourant.id;
 
-            if (!id || !nom || isNaN(stock) || isNaN(prix)) {
-                afficherMessage("Veuillez remplir tous les champs du produit.");
-                return;
-            }
-
-            if (supabaseClient) {
-                const { error } = await supabaseClient.from("produits").upsert({ id, nom, stock, prix });
-                if (error) {
-                    afficherMessage("Erreur Supabase : " + error.message);
-                    return;
-                }
-                await chargerProduitsSupabase();
-            } else {
-                const idx = produits.findIndex(p => p.id === id);
-                if (idx >= 0) produits[idx] = { id, nom, stock, prix };
-                else produits.push({ id, nom, stock, prix });
-                rendreCatalogue();
-            }
-
-            document.getElementById("adminProdId").value = "";
-            document.getElementById("adminProdNom").value = "";
-            document.getElementById("adminProdStock").value = "";
-            document.getElementById("adminProdPrix").value = "";
-            afficherMessage(`Produit ${id} mis à jour.`);
-        }
-
-        async function chargerUtilisateurs() {
-            if (!supabaseClient || roleCourant !== "admin") return;
-            const { data, error } = await supabaseClient.from("profiles").select("*").order("created_at");
-            if (error || !data) return;
-
-            const tbody = document.getElementById("listeUtilisateurs");
-            tbody.innerHTML = data.map(u => `
+            return `
                 <tr>
-                    <td class="py-2 font-medium">${u.email || u.nom_complet}</td>
-                    <td class="py-2 uppercase font-semibold">${u.role}</td>
+                    <td class="py-2 font-medium">${label}</td>
+                    <td class="py-2 uppercase font-semibold">${echapperHtml(roleActuel)}</td>
                     <td class="py-2 text-right">
                         <button type="button"
-                                onclick="changerRole('${u.id}', '${u.role === 'admin' ? 'caissier' : 'admin'}')"
-                                class="px-2 py-1 rounded border hover:bg-slate-50"
+                                ${estSoiMeme ? "disabled title='Vous ne pouvez pas modifier votre propre rôle ici'" : ""}
+                                onclick="changerRole('${echapperHtml(u.id)}', '${prochainRole}')"
+                                class="px-2 py-1 rounded border hover:bg-slate-50 disabled:opacity-40"
                                 style="border-color: var(--pharma-line);">
-                            Passer ${u.role === 'admin' ? 'Caissier' : 'Admin'}
+                            ${texteBouton}
                         </button>
                     </td>
                 </tr>
-            `).join("");
+            `;
+        }).join("") || `<tr><td colspan="3" class="py-3 text-center text-xs" style="color: var(--pharma-muted);">Aucun utilisateur.</td></tr>`;
+    }
+
+    async function changerRole(userId, nouveauRole) {
+        if (!supabaseClient || roleCourant !== "admin") return;
+        if (nouveauRole !== "admin" && nouveauRole !== "caissier") return;
+        if (utilisateurCourant && userId === utilisateurCourant.id) {
+            afficherMessage("Impossible de modifier votre propre rôle actif.");
+            return;
         }
 
-        async function changerRole(userId, nouveauRole) {
-            if (!supabaseClient || roleCourant !== "admin") return;
-            const { error } = await supabaseClient.from("profiles").update({ role: nouveauRole }).eq("id", userId);
-            if (!error) {
-                afficherMessage("Rôle utilisateur mis à jour.");
-                await chargerUtilisateurs();
-            }
+        const { error } = await supabaseClient
+            .from("profiles")
+            .update({ role: nouveauRole })
+            .eq("id", userId);
+
+        if (error) {
+            afficherMessage("Erreur mise à jour rôle : " + error.message);
+            return;
         }
 
-        function formaterPrix(val) {
-            return `${Number(val).toFixed(2)} USD`;
-        }
+        afficherMessage(`Rôle mis à jour (${nouveauRole}).`);
+        await chargerUtilisateurs();
+    }
 
-        function rendreCatalogue() {
-            const filtre = (document.getElementById("champRecherche").value || "").toLowerCase().trim();
-            const tbody = document.getElementById("listeProduits");
-            const lignes = produits.filter(p => p.nom.toLowerCase().includes(filtre) || p.id.toLowerCase().includes(filtre));
+    function formaterPrix(val) {
+        return `${Number(val || 0).toFixed(2)} USD`;
+    }
 
-            tbody.innerHTML = lignes.map(p => `
+    function rendreCatalogue() {
+        const filtre = (document.getElementById("champRecherche").value || "").toLowerCase().trim();
+        const tbody = document.getElementById("listeProduits");
+        const lignes = produits.filter(p =>
+            p.nom.toLowerCase().includes(filtre) || p.id.toLowerCase().includes(filtre)
+        );
+
+        tbody.innerHTML = lignes.map(p => {
+            const stockOk = Number(p.stock) > 10;
+            return `
                 <tr>
                     <td class="py-3 pr-3 font-medium">
-                        <div>${p.nom}</div>
-                        <div class="text-xs" style="color: var(--pharma-muted);">${p.id}</div>
+                        <div>${echapperHtml(p.nom)}</div>
+                        <div class="text-xs" style="color: var(--pharma-muted);">${echapperHtml(p.id)}</div>
                     </td>
                     <td class="py-3 px-3">
-                        <span class="px-2 py-0.5 rounded text-xs font-semibold ${p.stock > 10 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
-                            ${p.stock}
+                        <span class="px-2 py-0.5 rounded text-xs font-semibold ${stockOk ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}">
+                            ${Number(p.stock)}
                         </span>
                     </td>
                     <td class="py-3 px-3 font-semibold">${formaterPrix(p.prix)}</td>
                     <td class="py-3 pl-3 text-right">
-                        <button type="button" onclick="ajouterAuPanier('${p.id}')"
-                                ${p.stock <= 0 ? "disabled" : ""}
+                        <button type="button" onclick="ajouterAuPanier('${echapperHtml(p.id)}')"
+                                ${Number(p.stock) <= 0 ? "disabled" : ""}
                                 class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-40"
                                 style="background-color: var(--pharma-green);">
                             Ajouter
                         </button>
                     </td>
                 </tr>
-            `).join("") || `<tr><td colspan="4" class="py-4 text-center text-xs" style="color: var(--pharma-muted);">Aucun produit trouvé.</td></tr>`;
-
-            document.getElementById("kpiProduits").textContent = produits.length;
-        }
-
-        function ajouterAuPanier(id) {
-            const prod = produits.find(p => p.id === id);
-            if (!prod || prod.stock <= 0) return;
-
-            const existant = panier.find(item => item.id === id);
-            if ((existant ? existant.qte : 0) + 1 > prod.stock) {
-                afficherMessage("Stock insuffisant pour cet article.");
-                return;
-            }
-
-            if (existant) existant.qte += 1;
-            else panier.push({ id: prod.id, nom: prod.nom, prix: Number(prod.prix), qte: 1 });
-
-            afficherMessage("");
-            rendrePanier();
-        }
-
-        function retirerDuPanier(id) {
-            panier = panier.filter(item => item.id !== id);
-            rendrePanier();
-        }
-
-        function viderPanier() {
-            panier = [];
-            afficherMessage("");
-            rendrePanier();
-        }
-
-        function calculerTotal() {
-            return panier.reduce((acc, item) => acc + item.prix * item.qte, 0);
-        }
-
-        function rendrePanier() {
-            const ul = document.getElementById("listePanier");
-            const total = calculerTotal();
-            const nbArticles = panier.reduce((acc, item) => acc + item.qte, 0);
-
-            ul.innerHTML = panier.map(item => `
-                <li class="py-2.5 flex items-center justify-between gap-2">
-                    <div>
-                        <p class="font-medium leading-snug">${item.nom}</p>
-                        <p class="text-xs" style="color: var(--pharma-muted);">${item.qte} × ${formaterPrix(item.prix)}</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-semibold">${formaterPrix(item.qte * item.prix)}</span>
-                        <button type="button" onclick="retirerDuPanier('${item.id}')" class="text-xs text-rose-600 hover:underline">
-                            Retirer
-                        </button>
-                    </div>
-                </li>
-            `).join("") || `<li class="py-4 text-xs text-center" style="color: var(--pharma-muted);">Panier vide.</li>`;
-
-            document.getElementById("kpiPanier").textContent = nbArticles;
-            document.getElementById("kpiTotal").textContent = formaterPrix(total);
-            document.getElementById("montantTotalTexte").textContent = formaterPrix(total);
-            mettreAJourFacture();
-        }
-
-        function mettreAJourFacture() {
-            const client = document.getElementById("nomClient").value || "Client comptoir";
-            const total = calculerTotal();
-            document.getElementById("factureClient").textContent = `Client : ${client}`;
-            document.getElementById("factureDate").textContent = `Date : ${new Date().toLocaleString("fr-FR")}`;
-            document.getElementById("factureLignes").innerHTML = panier.map(item => `
-                <tr>
-                    <td class="py-2">${item.nom}</td>
-                    <td class="py-2 text-center">${item.qte}</td>
-                    <td class="py-2 text-right">${formaterPrix(item.prix)}</td>
-                    <td class="py-2 text-right">${formaterPrix(item.qte * item.prix)}</td>
-                </tr>
-            `).join("");
-            document.getElementById("factureTotal").textContent = formaterPrix(total);
-
-            const qrContainer = document.getElementById("qrcodeFacture");
-            qrContainer.innerHTML = "";
-            if (window.QRCode && panier.length > 0) {
-                new QRCode(qrContainer, {
-                    text: JSON.stringify({ app: "PharmaRDC", client, total: total.toFixed(2), date: new Date().toISOString() }),
-                    width: 96,
-                    height: 96
-                });
-            }
-        }
-
-        async function validerVente() {
-            if (panier.length === 0) {
-                afficherMessage("Ajoutez au moins un produit avant d'encaisser.");
-                return;
-            }
-
-            const client = document.getElementById("nomClient").value || "Client comptoir";
-
-            if (supabaseClient) {
-                const { error } = await supabaseClient.rpc("enregistrer_vente", {
-                    p_client: client,
-                    p_articles: panier
-                });
-                if (error) {
-                    afficherMessage("Erreur lors de la vente : " + error.message);
-                    return;
-                }
-                await chargerProduitsSupabase();
-            } else {
-                panier.forEach(item => {
-                    const prod = produits.find(p => p.id === item.id);
-                    if (prod) prod.stock = Math.max(0, prod.stock - item.qte);
-                });
-                rendreCatalogue();
-            }
-
-            afficherMessage("Vente enregistrée avec succès.");
-            imprimerFacture();
-            panier = [];
-            rendrePanier();
-        }
-
-        function imprimerFacture() {
-            mettreAJourFacture();
-            window.print();
-        }
-
-        function afficherMessage(msg) {
-            document.getElementById("messageFeedback").textContent = msg;
-        }
-
-        initialiserApp();
-    </script>
-</body>
-</html>
-                const renduCdf = montantRecu - totalCdf;
-                monnaieTexte = `${renduCdf.toLocaleString()} CDF (${(renduCdf / tauxChange).toFixed(2)} $)`;
-            }
-
-            stocks[index].qte -= qteVendue;
-
-            const vente = {
-                numFacture: "FAC-" + Math.floor(10000 + Math.random() * 90000),
-                date: new Date().toLocaleString(),
-                client: clientNom,
-                nomProduit: produit.nom,
-                qte: qteVendue,
-                totalHt: totalHtUsd.toFixed(2),
-                montantTva: montantTvaUsd.toFixed(2),
-                totalUsd: totalTtcUsd.toFixed(2),
-                totalCdf: totalCdf.toLocaleString(),
-                devise: devise,
-                montantRecu: montantRecu.toLocaleString() + " " + devise,
-                monnaieRendue: monnaieTexte
-            };
-
-            ventesHistorique.unshift(vente);
-            sauvegarderEtAfficher();
-            afficherFacturePopup(vente);
-        }
-
-        function afficherFacturePopup(v) {
-            document.getElementById('factureNum').innerText = v.numFacture;
-            document.getElementById('factureTaux').innerText = tauxChange.toLocaleString();
-            document.getElementById('factureClientNom').innerText = v.client;
-            document.getElementById('factureLignes').innerHTML = `
-                <tr>
-                    <td class="py-1"><strong>${v.nomProduit}</strong></td>
-                    <td class="py-1 text-center">${v.qte || 1}</td>
-                    <td class="py-1 text-right font-bold">${v.totalUsd} $</td>
-                </tr>
             `;
-            document.getElementById('factureTotalHt').innerText = v.totalHt + " $";
-            document.getElementById('factureMontantTva').innerText = v.montantTva + " $";
-            document.getElementById('factureTotalUsd').innerText = v.totalUsd + " $";
-            document.getElementById('factureTotalCdf').innerText = v.totalCdf + " CDF";
-            document.getElementById('factureDevisePaiement').innerText = v.devise;
-            document.getElementById('factureMontantRecu').innerText = v.montantRecu;
-            document.getElementById('factureMonnaieRendue').innerText = v.monnaieRendue;
+        }).join("") || `<tr><td colspan="4" class="py-4 text-center text-xs" style="color: var(--pharma-muted);">Aucun produit trouvé.</td></tr>`;
 
-            const zoneQr = document.getElementById('qrcode');
-            zoneQr.innerHTML = "";
-            new QRCode(zoneQr, {
-                text: `NIF:${profilOfficine.nif}|FAC:${v.numFacture}|TTC:${v.totalUsd}USD`,
-                width: 65,
-                height: 65
+        document.getElementById("kpiProduits").textContent = produits.length;
+    }
+
+    function ajouterAuPanier(id) {
+        const prod = produits.find(p => p.id === id);
+        if (!prod || Number(prod.stock) <= 0) return;
+
+        const existant = panier.find(item => item.id === id);
+        const qteActuelle = existant ? existant.qte : 0;
+
+        if (qteActuelle + 1 > Number(prod.stock)) {
+            afficherMessage("Stock insuffisant pour cet article.");
+            return;
+        }
+
+        if (existant) {
+            existant.qte += 1;
+        } else {
+            panier.push({
+                id: prod.id,
+                nom: prod.nom,
+                prix: Number(prod.prix),
+                qte: 1
             });
-            document.getElementById('sectionFactureImpression').classList.remove('hidden');
         }
 
-        function imprimerFactureActuelle() {
-            window.print();
-        }
-
-        function fermerFacture() {
-            document.getElementById('sectionFactureImpression').classList.add('hidden');
-        }
-
-        // Initialisation
-        verifierAccesAbonnement();
-        appliquerIdentiteOfficine();
-        initialiserCatalogueSelect();
-        sauvegarderEtAfficher();
-    </script>
-
-<script id="pharmardc-actions-dropdown-behavior">
-    function togglePharmaActionsMenu(event) {
-        if (event) event.stopPropagation();
-        const menu = document.getElementById('pharmaActionsMenu');
-        const trigger = document.getElementById('pharmaActionsTrigger');
-        if (!menu || !trigger) return;
-        const willOpen = menu.classList.contains('hidden');
-        menu.classList.toggle('hidden', !willOpen);
-        trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        afficherMessage("");
+        rendrePanier();
     }
 
-    function fermerPharmaActionsMenu() {
-        const menu = document.getElementById('pharmaActionsMenu');
-        const trigger = document.getElementById('pharmaActionsTrigger');
-        if (menu) menu.classList.add('hidden');
-        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    function retirerDuPanier(id) {
+        panier = panier.filter(item => item.id !== id);
+        rendrePanier();
     }
 
-    document.addEventListener('click', function (event) {
-        const wrap = document.getElementById('pharmaActionsWrap');
-        if (wrap && !wrap.contains(event.target)) fermerPharmaActionsMenu();
-    });
+    function viderPanier() {
+        panier = [];
+        afficherMessage("");
+        rendrePanier();
+    }
 
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') fermerPharmaActionsMenu();
-    });
+    function calculerTotal() {
+        return panier.reduce((acc, item) => acc + (Number(item.prix) * Number(item.qte)), 0);
+    }
+
+    function rendrePanier() {
+        const ul = document.getElementById("listePanier");
+        const total = calculerTotal();
+        const nbArticles = panier.reduce((acc, item) => acc + Number(item.qte), 0);
+
+        ul.innerHTML = panier.map(item => `
+            <li class="py-2.5 flex items-center justify-between gap-2">
+                <div>
+                    <p class="font-medium leading-snug">${echapperHtml(item.nom)}</p>
+                    <p class="text-xs" style="color: var(--pharma-muted);">${Number(item.qte)} × ${formaterPrix(item.prix)}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="font-semibold">${formaterPrix(Number(item.qte) * Number(item.prix))}</span>
+                    <button type="button" onclick="retirerDuPanier('${echapperHtml(item.id)}')" class="text-xs text-rose-600 hover:underline">
+                        Retirer
+                    </button>
+                </div>
+            </li>
+        `).join("") || `<li class="py-4 text-xs text-center" style="color: var(--pharma-muted);">Panier vide.</li>`;
+
+        document.getElementById("kpiPanier").textContent = nbArticles;
+        document.getElementById("kpiTotal").textContent = formaterPrix(total);
+        document.getElementById("montantTotalTexte").textContent = formaterPrix(total);
+        mettreAJourFacture();
+    }
+
+    function mettreAJourFacture() {
+        const client = (document.getElementById("nomClient").value || "").trim() || "Client comptoir";
+        const total = calculerTotal();
+
+        document.getElementById("factureClient").textContent = `Client : ${client}`;
+        document.getElementById("factureDate").textContent = `Date : ${new Date().toLocaleString("fr-FR")}`;
+        document.getElementById("factureLignes").innerHTML = panier.map(item => `
+            <tr>
+                <td class="py-2">${echapperHtml(item.nom)}</td>
+                <td class="py-2 text-center">${Number(item.qte)}</td>
+                <td class="py-2 text-right">${formaterPrix(item.prix)}</td>
+                <td class="py-2 text-right">${formaterPrix(Number(item.qte) * Number(item.prix))}</td>
+            </tr>
+        `).join("");
+        document.getElementById("factureTotal").textContent = formaterPrix(total);
+
+        const qrContainer = document.getElementById("qrcodeFacture");
+        qrContainer.innerHTML = "";
+        if (window.QRCode && panier.length > 0) {
+            new QRCode(qrContainer, {
+                text: JSON.stringify({
+                    app: "PharmaRDC",
+                    client,
+                    total: total.toFixed(2),
+                    date: new Date().toISOString()
+                }),
+                width: 96,
+                height: 96
+            });
+        }
+    }
+
+    async function validerVente() {
+        if (panier.length === 0) {
+            afficherMessage("Ajoutez au moins un produit avant d'encaisser.");
+            return;
+        }
+
+        const client = (document.getElementById("nomClient").value || "").trim() || "Client comptoir";
+        const articlesSnapshot = panier.map(item => ({
+            id: item.id,
+            nom: item.nom,
+            prix: Number(item.prix),
+            qte: Number(item.qte)
+        }));
+
+        if (supabaseClient) {
+            const { error } = await supabaseClient.rpc("enregistrer_vente", {
+                p_client: client,
+                p_articles: articlesSnapshot
+            });
+
+            if (error) {
+                afficherMessage("Erreur lors de la vente : " + error.message);
+                return;
+            }
+            await chargerProduitsSupabase();
+        } else {
+            articlesSnapshot.forEach(item => {
+                const prod = produits.find(p => p.id === item.id);
+                if (prod) {
+                    prod.stock = Math.max(0, Number(prod.stock) - item.qte);
+                }
+            });
+            rendreCatalogue();
+        }
+
+        mettreAJourFacture();
+        afficherMessage("Vente enregistrée avec succès.");
+        window.print();
+        panier = [];
+        rendrePanier();
+    }
+
+    function imprimerFacture() {
+        mettreAJourFacture();
+        window.print();
+    }
+
+    function afficherMessage(msg) {
+        document.getElementById("messageFeedback").textContent = msg;
+    }
+
+    initialiserApp();
 </script>
-
-</body>
-</html>
