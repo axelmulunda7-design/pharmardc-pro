@@ -687,1180 +687,602 @@
     </style>
 
 </head>
-<body class="bg-slate-50 text-slate-900 h-full flex flex-col antialiased selection:bg-emerald-600 selection:text-white">
-
-    <!-- Écran d'accès / abonnement officine -->
-    <div id="sectionAbonnement" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="subscription-shell">
-            <aside class="subscription-visual" aria-label="Présentation de PharmaRDC Pro">
-                <div class="visual-brand"><span class="visual-brand-mark">✚</span><span>PHARMARDC <b>PRO</b></span></div>
-                <div class="visual-copy">
-                    <span class="visual-kicker">GESTION INTELLIGENTE D’OFFICINE</span>
-                    <h2>Votre pharmacie, parfaitement organisée.</h2>
-                    <p>Un espace de travail clair pour suivre vos stocks, vos ventes et votre activité au quotidien.</p>
-                </div>
-                <div class="visual-feature-line"><span>STOCK & LOTS</span><i></i><span>CAISSE</span><i></i><span>INVENTAIRE</span></div>
-            </aside>
-            <div class="subscription-content">
-            <div class="text-center space-y-2">
-                <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-600 to-teal-500 mx-auto flex items-center justify-center shadow-lg text-3xl text-white">
-                    💊
-                </div>
-                <h2 class="text-2xl font-black text-slate-900">PharmaRDC Pro</h2>
-                <p class="text-xs text-slate-500 font-medium">Gestion de stock officinal, caisse et facturation DGI</p>
-            </div>
-
-            <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 p-5 rounded-2xl flex items-center justify-between">
-                <div>
-                    <span class="text-[10px] bg-emerald-600 text-white px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Licence Officine</span>
-                    <h3 class="text-xl font-extrabold text-emerald-900 mt-1">Accès Complet Pro</h3>
-                    <p class="text-xs text-emerald-700 mt-0.5">Lots & péremption, Caisse POS, Inventaire, Factures QR</p>
-                </div>
-                <div class="text-right">
-                    <span class="text-3xl font-black text-emerald-800">5 $</span>
-                    <span class="text-xs text-emerald-600 block font-semibold">/ mois</span>
-                </div>
-            </div>
-
-            <div class="space-y-4">
-                <div class="border-b border-slate-100 pb-2 flex justify-between items-center">
-                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Activation de l'officine :</h4>
-                    <button type="button" onclick="ouvrirConnexionAdmin()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold underline">
-                        🔐 Accès Administrateur
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-3 gap-3">
-                    <button type="button" onclick="selectionnerModePaiement('mobile')" id="btnMobile" class="p-3.5 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 text-xs font-bold transition flex flex-col items-center gap-1.5">
-                        <span class="text-xl">📱</span> Mobile Money
-                    </button>
-                    <button type="button" onclick="selectionnerModePaiement('carte')" id="btnCarte" class="p-3.5 rounded-2xl border-2 border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-bold transition flex flex-col items-center gap-1.5">
-                        <span class="text-xl">💳</span> Carte Bancaire
-                    </button>
-                    <button type="button" onclick="selectionnerModePaiement('code')" id="btnCode" class="p-3.5 rounded-2xl border-2 border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-bold transition flex flex-col items-center gap-1.5">
-                        <span class="text-xl">🔑</span> Code Licence
-                    </button>
-                </div>
-
-                <div id="formMobileMoney" class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                    <p class="text-xs font-semibold text-slate-600">Paiement mobile (M-Pesa, Orange Money, Airtel Money)</p>
-                    <div class="grid grid-cols-3 gap-2">
-                        <select id="operateurMobile" class="bg-white border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-800">
-                            <option value="M-Pesa">M-Pesa</option>
-                            <option value="Orange">Orange Money</option>
-                            <option value="Airtel">Airtel Money</option>
-                        </select>
-                        <input type="text" id="numTelephoneAbonnement" placeholder="Numéro (ex: 810000000)" class="col-span-2 bg-white border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800">
+<body class="h-full antialiased" style="background-color: var(--pharma-bg); color: var(--pharma-ink);">
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- Barre supérieure -->
+        <header class="no-print sticky top-0 z-30 border-b backdrop-blur bg-white/90" style="border-color: var(--pharma-line);">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shadow-sm"
+                         style="background: linear-gradient(135deg, var(--pharma-green), var(--pharma-green-dark));">
+                        P+
                     </div>
-                    <button type="button" onclick="simulerPaiementMobile()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-extrabold text-xs transition shadow-md">
-                        Valider 5 $ & Ouvrir l'Officine
-                    </button>
-                </div>
-
-                <div id="formCarteBancaire" class="hidden bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                    <p class="text-xs font-semibold text-slate-600">Paiement par carte Visa / Mastercard</p>
-                    <input type="text" placeholder="Numéro de carte" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="text" placeholder="MM / AA" class="bg-white border border-slate-200 rounded-xl p-2.5 text-xs">
-                        <input type="text" placeholder="CVV" class="bg-white border border-slate-200 rounded-xl p-2.5 text-xs">
-                    </div>
-                    <button type="button" onclick="simulerPaiementCarte()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-extrabold text-xs transition shadow-md">
-                        Confirmer le Paiement
-                    </button>
-                </div>
-
-                <div id="formCodeLicence" class="hidden bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                    <p class="text-xs font-semibold text-slate-600">Saisissez le code de licence transmis par l'administrateur :</p>
-                    <input type="text" id="inputCodePrepaye" placeholder="EX: PHARMA-2026-XXXX" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs font-mono uppercase text-slate-800 font-bold">
-                    <button type="button" onclick="verifierCodeLicence()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-extrabold text-xs transition shadow-md">
-                        Activer la Licence 🔑
-                    </button>
-                </div>
-            </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Fenêtre de connexion administrateur -->
-    <div id="modaleAdminLogin" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-white text-slate-900 max-w-sm w-full rounded-3xl shadow-2xl p-6 border space-y-4">
-            <div class="text-center">
-                <span class="text-3xl">🛡️</span>
-                <h3 class="text-base font-extrabold mt-1">Connexion Administrateur</h3>
-                <p class="text-xs text-slate-500">Accès direct à la gestion des licences</p>
-            </div>
-            <input type="password" id="inputAdminPassword" placeholder="Mot de passe admin" onkeydown="if(event.key==='Enter') validerConnexionAdmin()" class="w-full bg-slate-50 border rounded-xl p-3 text-sm text-center font-bold tracking-widest focus:outline-none focus:border-indigo-600">
-            <div class="flex gap-2">
-                <button type="button" onclick="validerConnexionAdmin()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-xs">Se connecter</button>
-                <button type="button" onclick="fermerConnexionAdmin()" class="bg-slate-100 px-4 py-3 rounded-xl text-xs font-semibold">Annuler</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tableau de bord administrateur -->
-    <div id="sectionAdminDashboard" class="hidden fixed inset-0 bg-slate-900 z-50 overflow-y-auto p-4 lg:p-8 text-white">
-        <div class="max-w-6xl mx-auto space-y-6">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
-                <div>
-                    <h2 class="text-2xl font-black flex items-center gap-2">👑 Gestion des Licences & Pharmacies</h2>
-                    <p class="text-xs text-slate-400">Suivi des abonnements mensuels (5 $/mois) et génération de codes</p>
-                </div>
-                <div class="flex gap-3">
-                    <button type="button" onclick="fermerAdminDashboard()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition">
-                        🖥️ Aller à l'Officine
-                    </button>
-                    <button type="button" onclick="deconnexionAdmin()" class="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition">
-                        Quitter Admin
-                    </button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-slate-800/80 border border-slate-700 p-5 rounded-2xl">
-                    <p class="text-xs text-slate-400 uppercase font-semibold">Pharmacies Enregistrées</p>
-                    <h3 id="adminTotalAbonnes" class="text-3xl font-black text-emerald-400 mt-1">1</h3>
-                </div>
-                <div class="bg-slate-800/80 border border-slate-700 p-5 rounded-2xl">
-                    <p class="text-xs text-slate-400 uppercase font-semibold">Total Mensuel Estimé</p>
-                    <h3 id="adminMrr" class="text-3xl font-black text-teal-400 mt-1">5.00 $</h3>
-                </div>
-                <div class="bg-slate-800/80 border border-slate-700 p-5 rounded-2xl">
-                    <p class="text-xs text-slate-400 uppercase font-semibold">Codes Générés</p>
-                    <h3 id="adminTotalCodes" class="text-3xl font-black text-indigo-400 mt-1">3</h3>
-                </div>
-            </div>
-
-            <div class="bg-slate-800/80 border border-slate-700 p-6 rounded-2xl space-y-4">
-                <div class="flex justify-between items-center">
                     <div>
-                        <h3 class="text-base font-bold">🔑 Codes de Licence (30 jours)</h3>
-                        <p class="text-xs text-slate-400">À transmettre au pharmacien après confirmation du règlement</p>
+                        <h1 class="text-base sm:text-lg font-bold leading-tight">PharmaRDC Pro</h1>
+                        <p class="text-xs" style="color: var(--pharma-muted);">Gestion d'Officine & Facturation</p>
                     </div>
-                    <button type="button" onclick="genererNouveauCodeLicence()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs">
-                        + Nouveau Code
+                </div>
+
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <span id="badgeRole" class="hidden text-xs px-2.5 py-1 rounded-full font-semibold uppercase"
+                          style="background-color: var(--pharma-mint); color: var(--pharma-green-dark);">
+                        Caissier
+                    </span>
+                    <button id="btnDeconnexion" type="button" onclick="deconnecter()"
+                            class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold border hover:bg-slate-50"
+                            style="border-color: var(--pharma-line);">
+                        Déconnexion
                     </button>
-                </div>
-                <div class="overflow-x-auto rounded-xl border border-slate-700">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-900 text-slate-400 border-b border-slate-700">
-                            <tr><th class="p-3">Code Licence</th><th class="p-3">Statut</th><th class="p-3">Action</th></tr>
-                        </thead>
-                        <tbody id="tableauCodesLicences" class="divide-y divide-slate-700/60 font-mono"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="bg-slate-800/80 border border-slate-700 p-6 rounded-2xl space-y-4">
-                <h3 class="text-base font-bold">🏥 Pharmacies Activées</h3>
-                <div class="overflow-x-auto rounded-xl border border-slate-700">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-900 text-slate-400 border-b border-slate-700">
-                            <tr><th class="p-3">Pharmacie</th><th class="p-3">NIF</th><th class="p-3">Statut</th><th class="p-3">Action</th></tr>
-                        </thead>
-                        <tbody id="tableauAbonnesAdmin" class="divide-y divide-slate-700/60"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Interface principale de l'officine -->
-    <div id="applicationPrincipale" class="hidden flex-1 flex flex-col">
-        <header class="bg-white/90 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 px-6 py-4 flex flex-wrap justify-between items-center gap-4 no-print shadow-xs">
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center shadow-md text-2xl text-white">
-                    💊
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h1 id="headerNomPharmacie" class="font-extrabold text-base tracking-tight text-slate-900 uppercase">PHARMACIE EXCELLENCE</h1>
-                        <span class="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Officine Pro</span>
-                    </div>
-                    <p id="headerSousTitre" class="text-xs text-slate-500 font-medium">Avenue du Commerce N° 12, Kinshasa</p>
-                </div>
-            </div>
-
-            <div class="pharma-header-tools">
-                <div class="pharma-actions-wrap" id="pharmaActionsWrap">
-                    <button
-                        type="button"
-                        id="pharmaActionsTrigger"
-                        class="pharma-actions-trigger"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                        aria-controls="pharmaActionsMenu"
-                        onclick="togglePharmaActionsMenu(event)">
-                        <span class="pharma-trigger-icon" aria-hidden="true">⚙</span>
-                        <span>Actions</span>
-                        <svg class="pharma-trigger-chevron" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                            <path d="m5.5 7.5 4.5 4.5 4.5-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
+                    <button type="button" onclick="imprimerFacture()"
+                            class="px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold text-white transition hover:opacity-95"
+                            style="background-color: var(--pharma-green);">
+                        Imprimer facture
                     </button>
-
-                    <div id="pharmaActionsMenu" class="pharma-actions-menu hidden" role="menu" aria-labelledby="pharmaActionsTrigger">
-                        <div class="pharma-menu-heading">GESTION DE L’OFFICINE</div>
-                        <button type="button" class="pharma-menu-item pharma-menu-admin" role="menuitem" onclick="ouvrirAdminDashboard(); fermerPharmaActionsMenu();">
-                            <span class="pharma-menu-icon" aria-hidden="true">♛</span>
-                            <span class="pharma-menu-copy"><strong>Gestion des licences</strong><small>Pharmacies et abonnements</small></span>
-                            <span class="pharma-menu-arrow" aria-hidden="true">›</span>
-                        </button>
-                        <button type="button" class="pharma-menu-item pharma-menu-settings" role="menuitem" onclick="ouvrirParametresOfficine(); fermerPharmaActionsMenu();">
-                            <span class="pharma-menu-icon" aria-hidden="true">⚙</span>
-                            <span class="pharma-menu-copy"><strong>Paramètres fiscaux</strong><small>Identité et informations de l’officine</small></span>
-                            <span class="pharma-menu-arrow" aria-hidden="true">›</span>
-                        </button>
-                        <div class="pharma-menu-divider" aria-hidden="true"></div>
-                        <button id="btnVerrouiller" type="button" class="pharma-menu-item pharma-menu-lock" role="menuitem" onclick="deconnexionAbonnement(); fermerPharmaActionsMenu();">
-                            <span class="pharma-menu-icon" aria-hidden="true">⌑</span>
-                            <span class="pharma-menu-copy"><strong>Verrouiller la session</strong><small>Fermer l’accès sur cet appareil</small></span>
-                            <span class="pharma-menu-arrow" aria-hidden="true">›</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="pharma-exchange-rate">
-                    <span class="pharma-rate-label">Taux</span>
-                    <input type="number" id="tauxChange" value="2850" aria-label="Taux de change en francs congolais" onchange="mettreAJourTaux()">
-                    <span class="pharma-rate-currency">CDF</span>
                 </div>
             </div>
         </header>
 
-        <main class="max-w-[1700px] w-full mx-auto p-4 lg:p-6 space-y-6 no-print">
-            <section class="app-intro" aria-label="Présentation du tableau de bord">
-                <div class="app-intro-copy">
-                    <span class="app-eyebrow"><span class="status-dot"></span> ESPACE DE GESTION OFFICINALE</span>
-                    <h2>Une officine bien gérée.<br><em>À chaque instant.</em></h2>
-                    <p>Pilotez vos stocks, votre comptoir et vos ventes depuis un seul espace, pensé pour le quotidien des pharmacies en RDC.</p>
-                    <nav class="module-shortcuts" aria-label="Accès rapide aux modules">
-                        <a href="#module-stock"><span>▦</span> Stock & lots</a>
-                        <a href="#module-caisse"><span>＋</span> Comptoir / Caisse</a>
-                        <a href="#module-ventes"><span>▤</span> Registre des ventes</a>
-                    </nav>
+        <!-- Écran de connexion / inscription (affiché si Supabase est configuré et non connecté) -->
+        <section id="vueAuth" class="no-print hidden flex-1 flex items-center justify-center px-4 py-10">
+            <div class="w-full max-w-md bg-white rounded-2xl p-6 border space-y-5"
+                 style="border-color: var(--pharma-line); box-shadow: var(--pharma-shadow);">
+                <div>
+                    <h2 class="text-xl font-extrabold">Connexion à l'officine</h2>
+                    <p class="text-xs mt-1" style="color: var(--pharma-muted);">
+                        Connectez-vous avec votre compte Pharmacien (Admin) ou Caissier.
+                    </p>
                 </div>
-                <div class="app-intro-visual" role="img" aria-label="Pharmacienne travaillant au comptoir d’une pharmacie moderne">
-                    <div class="intro-photo-caption"><span class="caption-icon">✚</span><span><b>PharmaRDC Pro</b><small>La gestion au cœur de votre officine</small></span></div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-medium mb-1">Email professionnel</label>
+                        <input id="authEmail" type="email" placeholder="pharmacien@officine.cd"
+                               class="w-full px-3 py-2 text-sm rounded-lg border outline-none"
+                               style="border-color: var(--pharma-line);">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium mb-1">Mot de passe</label>
+                        <input id="authPassword" type="password" placeholder="••••••••"
+                               class="w-full px-3 py-2 text-sm rounded-lg border outline-none"
+                               style="border-color: var(--pharma-line);">
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="button" onclick="connecter()"
+                            class="flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold text-white"
+                            style="background-color: var(--pharma-green);">
+                        Se connecter
+                    </button>
+                    <button type="button" onclick="inscrire()"
+                            class="py-2.5 px-4 rounded-lg text-sm font-semibold border hover:bg-slate-50"
+                            style="border-color: var(--pharma-line);">
+                        Créer un compte
+                    </button>
+                </div>
+                <p id="authMessage" class="text-xs text-rose-600 min-h-[1rem]"></p>
+            </div>
+        </section>
+
+        <!-- Contenu principal -->
+        <main id="vuePrincipale" class="no-print flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+            <!-- Bandeau d'accueil -->
+            <section class="relative overflow-hidden rounded-2xl p-6 text-white"
+                     style="background-color: var(--pharma-green-dark); box-shadow: var(--pharma-shadow);">
+                <div class="relative z-10 max-w-2xl space-y-2">
+                    <p id="infoUtilisateur" class="text-xs uppercase tracking-wider font-semibold opacity-90">
+                        Officine — Mode démonstration locale
+                    </p>
+                    <h2 class="text-xl sm:text-2xl font-extrabold">Vente rapide, suivi des stocks et reçu normalisé</h2>
+                    <p class="text-sm opacity-90">Les administrateurs peuvent gérer le stock et les rôles ; les caissiers enregistrent les ventes au comptoir.</p>
+                </div>
+                <div aria-hidden="true"
+                     class="pointer-events-none absolute inset-0 opacity-20 bg-cover bg-center"
+                     style="background-image: var(--pharma-hero-image);"></div>
+            </section>
+
+            <!-- Indicateurs clés -->
+            <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white rounded-xl p-4 border" style="border-color: var(--pharma-line);">
+                    <p class="text-xs font-medium" style="color: var(--pharma-muted);">Références en stock</p>
+                    <p id="kpiProduits" class="text-2xl font-bold mt-1">0</p>
+                </div>
+                <div class="bg-white rounded-xl p-4 border" style="border-color: var(--pharma-line);">
+                    <p class="text-xs font-medium" style="color: var(--pharma-muted);">Articles dans le panier</p>
+                    <p id="kpiPanier" class="text-2xl font-bold mt-1">0</p>
+                </div>
+                <div class="bg-white rounded-xl p-4 border" style="border-color: var(--pharma-line);">
+                    <p class="text-xs font-medium" style="color: var(--pharma-muted);">Total à payer</p>
+                    <p id="kpiTotal" class="text-2xl font-bold mt-1" style="color: var(--pharma-green);">0.00 USD</p>
                 </div>
             </section>
-            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white border rounded-3xl p-5 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-semibold text-slate-500 uppercase">CA Période (USD)</p>
-                        <h3 id="kpiCaUsd" class="text-3xl font-black text-emerald-700 mt-1">0.00 $</h3>
-                    </div>
-                    <div class="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-700 text-2xl">💵</div>
-                </div>
-                <div class="bg-white border rounded-3xl p-5 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-semibold text-slate-500 uppercase">CA Période (CDF)</p>
-                        <h3 id="kpiCaCdf" class="text-2xl font-black text-teal-700 mt-1">0 CDF</h3>
-                    </div>
-                    <div class="w-14 h-14 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-700 text-2xl">🇨🇩</div>
-                </div>
-                <div class="bg-white border rounded-3xl p-5 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-semibold text-slate-500 uppercase">Ventes Enregistrées</p>
-                        <h3 id="kpiTotalVentes" class="text-3xl font-black text-blue-700 mt-1">0</h3>
-                    </div>
-                    <div class="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-700 text-2xl">🧾</div>
-                </div>
-                <div class="bg-white border rounded-3xl p-5 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-semibold text-slate-500 uppercase">Alerte Péremption</p>
-                        <h3 id="kpiAlertes" class="text-3xl font-black text-rose-600 mt-1">0</h3>
-                    </div>
-                    <div class="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-600 text-2xl">⚠️</div>
-                </div>
-            </section>
 
-            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-                <section id="module-stock" class="xl:col-span-7 bg-white border rounded-3xl p-6 shadow-sm flex flex-col">
-                    <div class="flex justify-between items-center mb-5 pb-4 border-b">
-                        <h2 class="text-base font-bold">📦 Stock & Lots</h2>
-                        <button type="button" onclick="exporterStocksCSV()" class="bg-slate-100 hover:bg-slate-200 text-xs px-4 py-2.5 rounded-xl font-semibold border transition">📥 Exporter Stock (CSV)</button>
+            <!-- Panneau Administration (visible uniquement pour le rôle 'admin') -->
+            <section id="panneauAdmin" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Ajout / Mise à jour produit -->
+                <div class="bg-white rounded-2xl p-5 border space-y-4" style="border-color: var(--pharma-line);">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-base">Administration — Ajouter / Réapprovisionner</h3>
+                        <span class="text-xs px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold">Admin</span>
                     </div>
-
-                    <div class="bg-slate-50 border p-4 rounded-2xl mb-5 space-y-3.5">
-                        <select id="selectCatalogue" class="w-full bg-white border text-sm rounded-xl p-3" onchange="remplissageAutomatiqueCatalogue()">
-                            <option value="">-- Sélectionner un médicament de référence --</option>
-                        </select>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <input type="text" id="nomProduit" placeholder="Nom Commercial" class="bg-white border text-sm rounded-xl px-3.5 py-2.5">
-                            <input type="text" id="numLot" placeholder="N° de Lot" class="bg-white border text-sm rounded-xl px-3.5 py-2.5">
-                            <input type="number" id="qteStock" placeholder="Quantité" class="bg-white border text-sm rounded-xl px-3.5 py-2.5">
-                            <input type="date" id="dateExp" class="bg-white border text-sm rounded-xl px-3.5 py-2.5">
-                            <input type="number" step="0.01" id="prixUsd" placeholder="Prix unitaire ($)" class="bg-white border text-sm rounded-xl px-3.5 py-2.5 sm:col-span-1 lg:col-span-2">
-                        </div>
-                        <button type="button" onclick="ajouterProduitStock()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-sm transition">+ Ajouter au Stock</button>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        <input id="adminProdId" type="text" placeholder="Code (ex: MED-05)"
+                               class="px-3 py-2 rounded-lg border" style="border-color: var(--pharma-line);">
+                        <input id="adminProdNom" type="text" placeholder="Nom du médicament"
+                               class="px-3 py-2 rounded-lg border" style="border-color: var(--pharma-line);">
+                        <input id="adminProdStock" type="number" min="0" placeholder="Quantité en stock"
+                               class="px-3 py-2 rounded-lg border" style="border-color: var(--pharma-line);">
+                        <input id="adminProdPrix" type="number" min="0" step="0.01" placeholder="Prix unitaire (USD)"
+                               class="px-3 py-2 rounded-lg border" style="border-color: var(--pharma-line);">
                     </div>
+                    <button type="button" onclick="enregistrerProduitAdmin()"
+                            class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold text-white"
+                            style="background-color: var(--pharma-green);">
+                        Enregistrer le produit
+                    </button>
+                </div>
 
-                    <div class="flex-1 overflow-x-auto rounded-2xl border max-h-[300px]">
-                        <table class="w-full text-left text-sm">
-                            <thead class="sticky top-0 bg-slate-100 text-xs uppercase border-b">
-                                <tr><th class="p-3.5">Produit</th><th class="p-3.5">Lot</th><th class="p-3.5">Qté</th><th class="p-3.5">Expiration</th><th class="p-3.5">Statut</th></tr>
+                <!-- Gestion des utilisateurs et rôles -->
+                <div class="bg-white rounded-2xl p-5 border space-y-4" style="border-color: var(--pharma-line);">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-base">Utilisateurs & Rôles</h3>
+                        <button type="button" onclick="chargerUtilisateurs()" class="text-xs font-semibold hover:underline"
+                                style="color: var(--pharma-green);">
+                            Actualiser
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b uppercase" style="border-color: var(--pharma-line); color: var(--pharma-muted);">
+                                    <th class="py-2">Utilisateur</th>
+                                    <th class="py-2">Rôle</th>
+                                    <th class="py-2 text-right">Action</th>
+                                </tr>
                             </thead>
-                            <tbody id="tableauStock" class="divide-y text-xs"></tbody>
+                            <tbody id="listeUtilisateurs" class="divide-y" style="border-color: var(--pharma-line);"></tbody>
                         </table>
                     </div>
-                </section>
-
-                <section id="module-caisse" class="xl:col-span-5 bg-white border rounded-3xl p-6 shadow-sm flex flex-col justify-between">
-                    <div>
-                        <div class="mb-5 pb-4 border-b">
-                            <h2 class="text-base font-bold">🛒 Comptoir / Caisse</h2>
-                            <p class="text-xs text-slate-500">TVA DGI (16%) et conversion automatique USD / CDF</p>
-                        </div>
-
-                        <div class="bg-slate-50 border p-3.5 rounded-2xl mb-4 space-y-2.5">
-                            <div class="grid grid-cols-2 gap-2">
-                                <input type="text" id="clientNom" placeholder="Nom du Client" class="bg-white border text-xs rounded-xl p-2.5">
-                                <select id="regimeTva" class="bg-white border text-xs rounded-xl p-2.5" onchange="calculerTotalVente()">
-                                    <option value="16">TVA 16%</option>
-                                    <option value="0">Exonéré (0%)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="space-y-3 mb-4">
-                            <select id="selectProduit" class="w-full bg-slate-50 border text-sm rounded-xl p-2.5" onchange="chargerPrixProduit()">
-                                <option value="">-- Choisir un médicament --</option>
-                            </select>
-                            <div class="grid grid-cols-2 gap-3">
-                                <input type="text" id="posPrixUsd" readonly placeholder="Prix ($)" class="bg-slate-100 border text-slate-700 font-extrabold text-sm rounded-xl p-2.5">
-                                <input type="number" id="posQte" value="1" min="1" class="bg-slate-50 border text-sm rounded-xl p-2.5" onchange="calculerTotalVente()">
-                            </div>
-                        </div>
-
-                        <div class="bg-slate-50 border p-3.5 rounded-2xl mb-4 space-y-1.5 text-xs">
-                            <div class="flex justify-between"><span>Total HT :</span><span id="apercuHt">0.00 $</span></div>
-                            <div class="flex justify-between"><span>TVA :</span><span id="apercuTva">0.00 $</span></div>
-                            <div class="flex justify-between font-black text-base text-emerald-700 border-t pt-1.5"><span>TTC USD :</span><span id="totalUsdAffichage">0.00 $</span></div>
-                            <div class="flex justify-between font-bold text-teal-700"><span>TTC CDF :</span><span id="totalCdfAffichage">0 CDF</span></div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3 mb-4">
-                            <select id="devisePaiement" class="bg-slate-50 border text-sm rounded-xl p-2.5">
-                                <option value="CDF">Francs (CDF)</option>
-                                <option value="USD">Dollars (USD)</option>
-                            </select>
-                            <input type="number" step="any" id="montantRecu" placeholder="Montant Reçu" class="bg-slate-50 border text-sm rounded-xl p-2.5">
-                        </div>
-                    </div>
-
-                    <button type="button" onclick="validerVenteEtGenererFacture()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-extrabold text-sm shadow-md transition">
-                        Valider la Vente & Générer Facture 🖨️
-                    </button>
-                </section>
-            </div>
-
-            <!-- Registre des ventes pour inventaire hebdomadaire ou mensuel -->
-            <section id="module-ventes" class="bg-white border rounded-3xl p-6 shadow-sm space-y-4">
-                <div class="flex flex-wrap justify-between items-center gap-3 pb-4 border-b">
-                    <div>
-                        <h2 class="text-base font-bold">📋 Registre des Ventes (Inventaire Hebdomadaire / Mensuel)</h2>
-                        <p class="text-xs text-slate-500">Les ventes s'accumulent ici jusqu'à votre inventaire ; exportez puis videz le registre pour la période suivante.</p>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <button type="button" onclick="exporterVentesCSV()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs px-4 py-2.5 rounded-xl font-bold transition">
-                            📊 Exporter Ventes (CSV)
-                        </button>
-                        <button type="button" onclick="viderVentesApresInventaire()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs px-4 py-2.5 rounded-xl font-bold transition">
-                            🧹 Vider après inventaire
-                        </button>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto rounded-2xl border max-h-[320px]">
-                    <table class="w-full text-left text-xs">
-                        <thead class="sticky top-0 bg-slate-100 text-xs uppercase border-b">
-                            <tr>
-                                <th class="p-3">Facture</th>
-                                <th class="p-3">Date / Heure</th>
-                                <th class="p-3">Client</th>
-                                <th class="p-3">Produit</th>
-                                <th class="p-3 text-center">Qté</th>
-                                <th class="p-3 text-right">Total USD</th>
-                                <th class="p-3 text-right">Total CDF</th>
-                                <th class="p-3">Paiement</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableauVentesInventaire" class="divide-y"></tbody>
-                    </table>
                 </div>
             </section>
-            <footer class="app-footer">
-                <div class="footer-brand"><span class="footer-mark">✚</span><span><b>PharmaRDC Pro</b><small>Gestion professionnelle d’officine</small></span></div>
-                <span class="footer-note">Une interface conçue pour accompagner votre activité au quotidien.</span>
-                <span class="footer-copy">© 2026 PharmaRDC Pro</span>
-            </footer>
+
+            <!-- Catalogue & Panier -->
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white rounded-2xl p-5 border space-y-4" style="border-color: var(--pharma-line);">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <h3 class="font-bold text-base">Catalogue & Stock</h3>
+                        <input id="champRecherche" type="search" oninput="rendreCatalogue()"
+                               placeholder="Rechercher un médicament..."
+                               class="w-full sm:w-64 px-3 py-2 text-sm rounded-lg border outline-none"
+                               style="border-color: var(--pharma-line);">
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b text-xs uppercase" style="border-color: var(--pharma-line); color: var(--pharma-muted);">
+                                    <th class="py-2.5 pr-3">Produit</th>
+                                    <th class="py-2.5 px-3">Stock</th>
+                                    <th class="py-2.5 px-3">Prix unitaire</th>
+                                    <th class="py-2.5 pl-3 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listeProduits" class="divide-y" style="border-color: var(--pharma-line);"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Panier / Vente en cours -->
+                <div class="bg-white rounded-2xl p-5 border flex flex-col justify-between space-y-4" style="border-color: var(--pharma-line);">
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-base">Ticket de caisse</h3>
+                        <div>
+                            <label for="nomClient" class="block text-xs font-medium mb-1" style="color: var(--pharma-muted);">
+                                Client / Ordonnance (optionnel)
+                            </label>
+                            <input id="nomClient" type="text" value="Client comptoir"
+                                   oninput="mettreAJourFacture()"
+                                   class="w-full px-3 py-2 text-sm rounded-lg border outline-none"
+                                   style="border-color: var(--pharma-line);">
+                        </div>
+                        <ul id="listePanier" class="divide-y text-sm" style="border-color: var(--pharma-line);"></ul>
+                    </div>
+
+                    <div class="pt-3 border-t space-y-3" style="border-color: var(--pharma-line);">
+                        <div class="flex items-center justify-between font-bold text-base">
+                            <span>Total</span>
+                            <span id="montantTotalTexte" style="color: var(--pharma-green);">0.00 USD</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="viderPanier()"
+                                    class="flex-1 py-2.5 px-3 rounded-lg text-sm font-semibold border hover:bg-slate-50"
+                                    style="border-color: var(--pharma-line);">
+                                Vider
+                            </button>
+                            <button type="button" onclick="validerVente()"
+                                    class="flex-1 py-2.5 px-3 rounded-lg text-sm font-semibold text-white hover:opacity-95"
+                                    style="background-color: var(--pharma-green);">
+                                Encaisser & Imprimer
+                            </button>
+                        </div>
+                        <p id="messageFeedback" class="text-xs min-h-[1rem]" style="color: var(--pharma-green-dark);"></p>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
-    <!-- Modale paramètres fiscaux -->
-    <div id="modaleParametres" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-md z-50 flex items-center justify-center p-4 no-print">
-        <div class="bg-white max-w-lg w-full rounded-3xl shadow-2xl p-6 space-y-4">
-            <h3 class="text-base font-extrabold">⚙️ Paramètres Fiscaux de l'Officine</h3>
-            <div class="space-y-3 text-sm">
-                <input type="text" id="inputNomPharmacie" placeholder="Nom de la pharmacie" class="w-full bg-slate-50 border rounded-xl p-2.5">
-                <input type="text" id="inputAdressePharmacie" placeholder="Adresse complète" class="w-full bg-slate-50 border rounded-xl p-2.5">
-                <input type="text" id="inputNif" placeholder="Numéro NIF" class="w-full bg-slate-50 border rounded-xl p-2.5">
+    <!-- Zone dédiée à l'impression (ciblée par @media print) -->
+    <section id="sectionFactureImpression" class="hidden print:block max-w-2xl mx-auto p-6 bg-white text-slate-900">
+        <div class="flex items-start justify-between border-b pb-4">
+            <div>
+                <h2 class="text-xl font-extrabold">PharmaRDC Pro</h2>
+                <p class="text-xs text-slate-500">Reçu de vente — Gestion d'Officine</p>
+                <p id="factureClient" class="text-xs mt-2 font-medium"></p>
+                <p id="factureDate" class="text-xs text-slate-500"></p>
             </div>
-            <div class="flex gap-2">
-                <button type="button" onclick="sauvegarderIdentiteOfficine()" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold text-xs">Enregistrer</button>
-                <button type="button" onclick="fermerParametresOfficine()" class="bg-slate-100 px-4 py-3 rounded-xl text-xs font-semibold">Annuler</button>
-            </div>
+            <div id="qrcodeFacture" class="w-24 h-24"></div>
         </div>
-    </div>
 
-    <!-- Modale facture normalisée -->
-    <div id="sectionFactureImpression" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl p-6 relative border">
-            <div class="text-center border-b-2 border-slate-900 pb-2.5 mb-2.5">
-                <h2 id="factureNomPharmacie" class="text-sm font-black uppercase">PHARMACIE</h2>
-                <p id="factureAdressePharmacie" class="text-[10px] text-slate-600">Kinshasa / RDC</p>
-                <p id="factureNif" class="text-[9px] text-slate-500 font-mono mt-0.5">NIF: A000000</p>
-                <div class="mt-1 bg-slate-900 text-white px-3 py-0.5 rounded text-[10px] font-extrabold uppercase">FACTURE NORMALISÉE - DGI</div>
-            </div>
+        <table class="w-full text-left border-collapse text-sm mt-4">
+            <thead>
+                <tr class="border-b text-xs text-slate-500">
+                    <th class="py-2">Désignation</th>
+                    <th class="py-2 text-center">Qté</th>
+                    <th class="py-2 text-right">PU</th>
+                    <th class="py-2 text-right">Sous-total</th>
+                </tr>
+            </thead>
+            <tbody id="factureLignes" class="divide-y"></tbody>
+        </table>
 
-            <div class="mb-2.5 text-[11px] grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded-xl">
-                <div>
-                    <p>Facture : <strong id="factureNum">FAC-0001</strong></p>
-                    <p>Client : <span id="factureClientNom">Client</span></p>
-                </div>
-                <div class="text-right">
-                    <p>Taux : <strong id="factureTaux">0</strong> CDF</p>
-                </div>
-            </div>
-
-            <table class="w-full text-[11px] mb-2.5 border-t border-b">
-                <thead><tr class="border-b text-left text-slate-600"><th class="py-1">Désignation</th><th class="py-1 text-center">Qté</th><th class="py-1 text-right">Total ($)</th></tr></thead>
-                <tbody id="factureLignes"></tbody>
-            </table>
-
-            <div class="space-y-1 text-[11px] border-b-2 border-slate-900 pb-2 mb-2 bg-slate-50 p-2 rounded-xl">
-                <div class="flex justify-between"><span>Total HT :</span><span id="factureTotalHt">0.00 $</span></div>
-                <div class="flex justify-between"><span>TVA :</span><span id="factureMontantTva">0.00 $</span></div>
-                <div class="flex justify-between font-extrabold text-xs"><span>TTC USD :</span><span id="factureTotalUsd">0.00 $</span></div>
-                <div class="flex justify-between font-bold text-blue-900"><span>TTC CDF :</span><span id="factureTotalCdf">0 CDF</span></div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3 items-center mb-4">
-                <div class="bg-slate-50 p-2 rounded-xl text-[10px] space-y-1">
-                    <div>Paiement : <strong id="factureDevisePaiement">USD</strong></div>
-                    <div>Reçu : <strong id="factureMontantRecu">0</strong></div>
-                    <div>Monnaie : <span id="factureMonnaieRendue">0</span></div>
-                </div>
-                <div class="flex flex-col items-center justify-center bg-white p-1 rounded-xl border">
-                    <div id="qrcode" class="w-16 h-16"></div>
-                    <span class="text-[8px] font-mono text-slate-400 mt-0.5">Vérification DGI</span>
-                </div>
-            </div>
-
-            <div class="flex gap-2">
-                <button type="button" onclick="imprimerFactureActuelle()" class="flex-1 bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-xs">Imprimer</button>
-                <button type="button" onclick="fermerFacture()" class="bg-slate-100 px-4 py-2.5 rounded-xl text-xs font-semibold">Fermer</button>
-            </div>
+        <div class="flex justify-between items-center border-t mt-4 pt-4 text-base font-bold">
+            <span>Total payé</span>
+            <span id="factureTotal">0.00 USD</span>
         </div>
-    </div>
+    </section>
 
-    <script>
-        // Connexion Supabase (active dès que l'URL et la clé publique sont renseignées)
+   <script>
+        // Renseignez vos clés Supabase (Project Settings > API)
         const SUPABASE_URL = "https://cyspkhpkpeajndzvsbjj.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_XCXYwDfRXeIc09Dz38q-gQ_X35Th0Fg";
 
-        const supabaseConfigure =
-            window.supabase &&
-            SUPABASE_URL &&
-            SUPABASE_ANON_KEY &&
-            !SUPABASE_URL.includes("https://cyspkhpkpeajndzvsbjj.supabase.co") &&
-            !SUPABASE_ANON_KEY.includes("sb_publishable_XCXYwDfRXeIc09Dz38q-gQ_X35Th0Fg");
-
-        const dbClient = supabaseConfigure
+        const supabaseClient = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
             ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
             : null;
 
-        // État d'accès et licences
-        let statutAbonnement = localStorage.getItem('statutAbonnement') || 'inactif';
-        let estConnecteAdmin = localStorage.getItem('estConnecteAdmin') === 'true';
-        let codeLicenceActif = localStorage.getItem('codeLicenceActif') || '';
-
-        let codesLicences = JSON.parse(localStorage.getItem('codesLicences')) || [
-            { id: 1, code: "PHARMA-2026-A101", statut: "Disponible", actif: true },
-            { id: 2, code: "PHARMA-2026-B202", statut: "Utilisé", actif: false },
-            { id: 3, code: "PHARMA-2026-C303", statut: "Disponible", actif: true }
+        let utilisateurCourant = null;
+        let roleCourant = "admin"; // En mode local sans Supabase, accès complet pour tester
+        let produits = [
+            { id: "MED-01", nom: "Paracétamol 500 mg (Boîte 20)", stock: 45, prix: 2.50 },
+            { id: "MED-02", nom: "Amoxicilline 500 mg (Gélules x12)", stock: 28, prix: 4.00 },
+            { id: "MED-03", nom: "Artéméther + Luméfantrine (Cure)", stock: 19, prix: 6.50 },
+            { id: "MED-04", nom: "Sérum physiologique 0.9% (500 ml)", stock: 60, prix: 1.80 }
         ];
+        let panier = [];
 
-        let listeAbonnes = JSON.parse(localStorage.getItem('listeAbonnes')) || [
-            { id: 1, nom: "PHARMACIE EXCELLENCE", nif: "A24001234B", statut_abonnement: "Actif (5$/mois)", actif: true }
-        ];
-
-        function enregistrerEtatLicences() {
-            localStorage.setItem('codesLicences', JSON.stringify(codesLicences));
-            localStorage.setItem('listeAbonnes', JSON.stringify(listeAbonnes));
-        }
-
-        async function verifierAccesAbonnement() {
-            const btnVerrouiller = document.getElementById('btnVerrouiller');
-            if (btnVerrouiller) {
-                btnVerrouiller.classList.toggle('hidden', !estConnecteAdmin);
-            }
-
-            if (!estConnecteAdmin && statutAbonnement === 'actif' && codeLicenceActif && dbClient) {
-                try {
-                    const { data, error } = await dbClient
-                        .from('licences')
-                        .select('actif, date_expiration')
-                        .eq('code', codeLicenceActif)
-                        .single();
-
-                    if (!error && data) {
-                        const estExpiree = data.date_expiration && new Date(data.date_expiration) < new Date();
-                        if (!data.actif || estExpiree) {
-                            statutAbonnement = 'inactif';
-                            localStorage.setItem('statutAbonnement', 'inactif');
-                        }
-                    }
-                } catch (err) {
-                    console.warn("Vérification licence en ligne indisponible :", err);
-                }
-            }
-
-            const accesAutorise = (statutAbonnement === 'actif' || estConnecteAdmin);
-            document.getElementById('sectionAbonnement').classList.toggle('hidden', accesAutorise);
-            document.getElementById('applicationPrincipale').classList.toggle('hidden', !accesAutorise);
-        }
-
-        function ouvrirConnexionAdmin() {
-            document.getElementById('modaleAdminLogin').classList.remove('hidden');
-            setTimeout(() => {
-                const champMdp = document.getElementById('inputAdminPassword');
-                if (champMdp) champMdp.focus();
-            }, 50);
-        }
-
-        function fermerConnexionAdmin() {
-            document.getElementById('modaleAdminLogin').classList.add('hidden');
-        }
-
-        function validerConnexionAdmin() {
-            const mdp = document.getElementById('inputAdminPassword').value;
-            if (mdp === "admin2026") {
-                estConnecteAdmin = true;
-                localStorage.setItem('estConnecteAdmin', 'true');
-                document.getElementById('inputAdminPassword').value = '';
-                fermerConnexionAdmin();
-                verifierAccesAbonnement();
-                ouvrirAdminDashboard();
-            } else {
-                alert("Mot de passe administrateur incorrect.");
-            }
-        }
-
-        function ouvrirAdminDashboard() {
-            estConnecteAdmin = true;
-            localStorage.setItem('estConnecteAdmin', 'true');
-            verifierAccesAbonnement();
-            document.getElementById('sectionAdminDashboard').classList.remove('hidden');
-            chargerDonneesAdmin();
-        }
-
-        function fermerAdminDashboard() {
-            document.getElementById('sectionAdminDashboard').classList.add('hidden');
-            verifierAccesAbonnement();
-        }
-
-        function deconnexionAdmin() {
-            estConnecteAdmin = false;
-            localStorage.removeItem('estConnecteAdmin');
-            fermerAdminDashboard();
-            verifierAccesAbonnement();
-        }
-
-        async function chargerDonneesAdmin() {
-            if (dbClient) {
-                const { data: licencesData } = await dbClient
-                    .from('licences')
-                    .select('*')
-                    .order('id', { ascending: false });
-
-                const { data: pharmaciesData } = await dbClient
-                    .from('pharmacies')
-                    .select('*')
-                    .order('id', { ascending: false });
-
-                if (licencesData) codesLicences = licencesData;
-                if (pharmaciesData) listeAbonnes = pharmaciesData;
-            }
-
-            const actifs = listeAbonnes.filter(item => item.actif !== false);
-            document.getElementById('adminTotalAbonnes').innerText = actifs.length;
-            document.getElementById('adminMrr').innerText = (actifs.length * 5).toFixed(2) + " $";
-            document.getElementById('adminTotalCodes').innerText = codesLicences.length;
-
-            const corpsCodes = document.getElementById('tableauCodesLicences');
-            corpsCodes.innerHTML = '';
-            codesLicences.forEach((licence, idx) => {
-                const disponible = licence.statut === 'Disponible' && licence.actif !== false;
-                const refId = licence.id !== undefined ? licence.id : idx;
-                corpsCodes.innerHTML += `
-                    <tr class="border-b border-slate-700/60">
-                        <td class="p-3 text-emerald-300 font-bold">${licence.code}</td>
-                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] ${disponible ? 'bg-emerald-900 text-emerald-200' : 'bg-slate-700 text-slate-400'}">${licence.statut}</span></td>
-                        <td class="p-3"><button type="button" onclick="supprimerCode(${refId})" class="text-rose-400 hover:text-rose-300 font-bold">Supprimer</button></td>
-                    </tr>
-                `;
-            });
-
-            const corpsAbonnes = document.getElementById('tableauAbonnesAdmin');
-            corpsAbonnes.innerHTML = '';
-            listeAbonnes.forEach((abonne, idx) => {
-                const refId = abonne.id !== undefined ? abonne.id : idx;
-                const libelleStatut = abonne.statut_abonnement || abonne.statut || 'Actif (5$/mois)';
-                const badge = abonne.actif === false
-                    ? `<span class="bg-rose-900 text-rose-200 px-2 py-0.5 rounded text-[10px]">Révoqué</span>`
-                    : `<span class="bg-emerald-900 text-emerald-200 px-2 py-0.5 rounded text-[10px]">${libelleStatut}</span>`;
-                corpsAbonnes.innerHTML += `
-                    <tr class="border-b border-slate-700/60">
-                        <td class="p-3 font-bold">${abonne.nom}</td>
-                        <td class="p-3 font-mono text-slate-400">${abonne.nif || '-'}</td>
-                        <td class="p-3">${badge}</td>
-                        <td class="p-3"><button type="button" onclick="revoquerAbonnement(${refId}, '${(abonne.code_licence || '').replace(/'/g, "\\'")}')" class="text-rose-400 hover:text-rose-300 font-bold">Révoquer</button></td>
-                    </tr>
-                `;
-            });
-        }
-
-        async function genererNouveauCodeLicence() {
-            const codeGenere = "PHARMA-2026-" + Math.floor(1000 + Math.random() * 9000);
-            if (dbClient) {
-                const { error } = await dbClient
-                    .from('licences')
-                    .insert([{ code: codeGenere, statut: "Disponible", actif: true }]);
-                if (error) {
-                    alert("Erreur création code : " + error.message);
-                    return;
-                }
-            } else {
-                codesLicences.unshift({ id: Date.now(), code: codeGenere, statut: "Disponible", actif: true });
-                enregistrerEtatLicences();
-            }
-            chargerDonneesAdmin();
-        }
-
-        async function supprimerCode(idOrIdx) {
-            if (dbClient) {
-                const { error } = await dbClient
-                    .from('licences')
-                    .delete()
-                    .eq('id', idOrIdx);
-                if (error) {
-                    alert("Erreur suppression code : " + error.message);
-                    return;
-                }
-            } else {
-                const pos = codesLicences.findIndex((c, i) => (c.id !== undefined ? c.id === idOrIdx : i === idOrIdx));
-                if (pos > -1) codesLicences.splice(pos, 1);
-                enregistrerEtatLicences();
-            }
-            chargerDonneesAdmin();
-        }
-
-        async function revoquerAbonnement(idOrIdx, codeAssocie) {
-            if (confirm("Révoquer l'accès de cette pharmacie ?")) {
-                if (dbClient) {
-                    await dbClient
-                        .from('pharmacies')
-                        .update({ actif: false, statut_abonnement: 'Révoqué' })
-                        .eq('id', idOrIdx);
-
-                    if (codeAssocie) {
-                        await dbClient
-                            .from('licences')
-                            .update({ actif: false })
-                            .eq('code', codeAssocie);
-                    }
-                } else {
-                    const pos = listeAbonnes.findIndex((a, i) => (a.id !== undefined ? a.id === idOrIdx : i === idOrIdx));
-                    if (pos > -1) {
-                        listeAbonnes[pos].actif = false;
-                        listeAbonnes[pos].statut_abonnement = 'Révoqué';
-                    }
-                    enregistrerEtatLicences();
-                }
-                chargerDonneesAdmin();
-            }
-        }
-
-        function selectionnerModePaiement(mode) {
-            document.getElementById('formMobileMoney').classList.add('hidden');
-            document.getElementById('formCarteBancaire').classList.add('hidden');
-            document.getElementById('formCodeLicence').classList.add('hidden');
-
-            const styleNeutre = "p-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 text-xs font-bold transition flex flex-col items-center gap-1.5";
-            document.getElementById('btnMobile').className = styleNeutre;
-            document.getElementById('btnCarte').className = styleNeutre;
-            document.getElementById('btnCode').className = styleNeutre;
-
-            if (mode === 'mobile') {
-                document.getElementById('formMobileMoney').classList.remove('hidden');
-                document.getElementById('btnMobile').className = "p-3.5 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 text-xs font-bold transition flex flex-col items-center gap-1.5";
-            } else if (mode === 'carte') {
-                document.getElementById('formCarteBancaire').classList.remove('hidden');
-                document.getElementById('btnCarte').className = "p-3.5 rounded-2xl border-2 border-blue-600 bg-blue-50 text-blue-900 text-xs font-bold transition flex flex-col items-center gap-1.5";
-            } else if (mode === 'code') {
-                document.getElementById('formCodeLicence').classList.remove('hidden');
-                document.getElementById('btnCode').className = "p-3.5 rounded-2xl border-2 border-indigo-600 bg-indigo-50 text-indigo-900 text-xs font-bold transition flex flex-col items-center gap-1.5";
-            }
-        }
-
-        function simulerPaiementMobile() {
-            const numero = document.getElementById('numTelephoneAbonnement').value.trim();
-            if (!numero) {
-                alert("Entrez un numéro de téléphone.");
-                return;
-            }
-            activerAbonnementReussi("Mobile Money (" + numero + ")");
-        }
-
-        function simulerPaiementCarte() {
-            activerAbonnementReussi("Carte Bancaire");
-        }
-
-        async function verifierCodeLicence() {
-            const saisie = document.getElementById('inputCodePrepaye').value.trim().toUpperCase();
-            if (!saisie) {
-                alert("Entrez un code de licence.");
+        async function initialiserApp() {
+            if (!supabaseClient) {
+                appliquerPermissionsUI();
+                rendreCatalogue();
+                rendrePanier();
                 return;
             }
 
-            const dateExp = new Date();
-            dateExp.setDate(dateExp.getDate() + 30);
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            await gererSession(session);
 
-            if (dbClient) {
-                const { data: licence, error } = await dbClient
-                    .from('licences')
-                    .select('*')
-                    .eq('code', saisie)
-                    .eq('statut', 'Disponible')
-                    .eq('actif', true)
-                    .single();
-
-                if (error || !licence) {
-                    alert("Code de licence invalide ou déjà utilisé.");
-                    return;
-                }
-
-                await dbClient
-                    .from('licences')
-                    .update({
-                        statut: 'Utilisé',
-                        pharmacie_nom: profilOfficine.nom,
-                        date_activation: new Date().toISOString(),
-                        date_expiration: dateExp.toISOString()
-                    })
-                    .eq('id', licence.id);
-            } else {
-                const licenceLocale = codesLicences.find(c => c.code === saisie && c.statut === 'Disponible' && c.actif !== false);
-                if (!licenceLocale) {
-                    alert("Code de licence invalide ou déjà utilisé.");
-                    return;
-                }
-                licenceLocale.statut = 'Utilisé';
-                enregistrerEtatLicences();
-            }
-
-            localStorage.setItem('codeLicenceActif', saisie);
-            codeLicenceActif = saisie;
-            activerAbonnementReussi("Code Licence (" + saisie + ")", dateExp.toISOString(), saisie);
+            supabaseClient.auth.onAuthStateChange((_event, nouvelleSession) => {
+                gererSession(nouvelleSession);
+            });
         }
 
-        async function activerAbonnementReussi(methode, dateExpIso = null, codeUtilise = "") {
-            localStorage.setItem('statutAbonnement', 'actif');
-            statutAbonnement = 'actif';
+        async function gererSession(session) {
+            const vueAuth = document.getElementById("vueAuth");
+            const vuePrincipale = document.getElementById("vuePrincipale");
+            const btnDeco = document.getElementById("btnDeconnexion");
+            const badgeRole = document.getElementById("badgeRole");
 
-            if (dbClient) {
-                await dbClient
-                    .from('pharmacies')
-                    .insert([{
-                        nom: profilOfficine.nom,
-                        adresse: profilOfficine.adresse,
-                        nif: profilOfficine.nif,
-                        code_licence: codeUtilise || null,
-                        statut_abonnement: "Actif via " + methode,
-                        date_expiration: dateExpIso,
-                        actif: true
-                    }]);
+            if (!session) {
+                utilisateurCourant = null;
+                vueAuth.classList.remove("hidden");
+                vuePrincipale.classList.add("hidden");
+                btnDeco.classList.add("hidden");
+                badgeRole.classList.add("hidden");
+                return;
+            }
+
+            utilisateurCourant = session.user;
+            vueAuth.classList.add("hidden");
+            vuePrincipale.classList.remove("hidden");
+            btnDeco.classList.remove("hidden");
+            badgeRole.classList.remove("hidden");
+
+            const { data: profil } = await supabaseClient
+                .from("profiles")
+                .select("role, nom_complet")
+                .eq("id", utilisateurCourant.id)
+                .single();
+
+            roleCourant = profil?.role || "caissier";
+            badgeRole.textContent = roleCourant;
+            document.getElementById("infoUtilisateur").textContent =
+                `Connecté : ${profil?.nom_complet || utilisateurCourant.email} (${roleCourant.toUpperCase()})`;
+
+            appliquerPermissionsUI();
+            await chargerProduitsSupabase();
+            if (roleCourant === "admin") {
+                await chargerUtilisateurs();
+            }
+            rendrePanier();
+        }
+
+        function appliquerPermissionsUI() {
+            const panneauAdmin = document.getElementById("panneauAdmin");
+            if (roleCourant === "admin") {
+                panneauAdmin.classList.remove("hidden");
             } else {
-                listeAbonnes.push({
-                    id: Date.now(),
-                    nom: profilOfficine.nom,
-                    nif: profilOfficine.nif,
-                    code_licence: codeUtilise || null,
-                    statut_abonnement: "Actif via " + methode,
-                    actif: true
+                panneauAdmin.classList.add("hidden");
+            }
+        }
+
+        async function connecter() {
+            const email = document.getElementById("authEmail").value.trim();
+            const password = document.getElementById("authPassword").value;
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            document.getElementById("authMessage").textContent = error ? error.message : "";
+        }
+
+        async function inscrire() {
+            const email = document.getElementById("authEmail").value.trim();
+            const password = document.getElementById("authPassword").value;
+            const { error } = await supabaseClient.auth.signUp({ email, password });
+            document.getElementById("authMessage").textContent = error
+                ? error.message
+                : "Compte créé. Vérifiez votre boîte mail ou connectez-vous.";
+        }
+
+        async function deconnecter() {
+            if (supabaseClient) await supabaseClient.auth.signOut();
+        }
+
+        async function chargerProduitsSupabase() {
+            if (!supabaseClient) return;
+            const { data, error } = await supabaseClient.from("produits").select("*").order("id");
+            if (!error && data) {
+                produits = data;
+                rendreCatalogue();
+            }
+        }
+
+        async function enregistrerProduitAdmin() {
+            if (roleCourant !== "admin") return;
+            const id = document.getElementById("adminProdId").value.trim().toUpperCase();
+            const nom = document.getElementById("adminProdNom").value.trim();
+            const stock = parseInt(document.getElementById("adminProdStock").value, 10);
+            const prix = parseFloat(document.getElementById("adminProdPrix").value);
+
+            if (!id || !nom || isNaN(stock) || isNaN(prix)) {
+                afficherMessage("Veuillez remplir tous les champs du produit.");
+                return;
+            }
+
+            if (supabaseClient) {
+                const { error } = await supabaseClient.from("produits").upsert({ id, nom, stock, prix });
+                if (error) {
+                    afficherMessage("Erreur Supabase : " + error.message);
+                    return;
+                }
+                await chargerProduitsSupabase();
+            } else {
+                const idx = produits.findIndex(p => p.id === id);
+                if (idx >= 0) produits[idx] = { id, nom, stock, prix };
+                else produits.push({ id, nom, stock, prix });
+                rendreCatalogue();
+            }
+
+            document.getElementById("adminProdId").value = "";
+            document.getElementById("adminProdNom").value = "";
+            document.getElementById("adminProdStock").value = "";
+            document.getElementById("adminProdPrix").value = "";
+            afficherMessage(`Produit ${id} mis à jour.`);
+        }
+
+        async function chargerUtilisateurs() {
+            if (!supabaseClient || roleCourant !== "admin") return;
+            const { data, error } = await supabaseClient.from("profiles").select("*").order("created_at");
+            if (error || !data) return;
+
+            const tbody = document.getElementById("listeUtilisateurs");
+            tbody.innerHTML = data.map(u => `
+                <tr>
+                    <td class="py-2 font-medium">${u.email || u.nom_complet}</td>
+                    <td class="py-2 uppercase font-semibold">${u.role}</td>
+                    <td class="py-2 text-right">
+                        <button type="button"
+                                onclick="changerRole('${u.id}', '${u.role === 'admin' ? 'caissier' : 'admin'}')"
+                                class="px-2 py-1 rounded border hover:bg-slate-50"
+                                style="border-color: var(--pharma-line);">
+                            Passer ${u.role === 'admin' ? 'Caissier' : 'Admin'}
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        async function changerRole(userId, nouveauRole) {
+            if (!supabaseClient || roleCourant !== "admin") return;
+            const { error } = await supabaseClient.from("profiles").update({ role: nouveauRole }).eq("id", userId);
+            if (!error) {
+                afficherMessage("Rôle utilisateur mis à jour.");
+                await chargerUtilisateurs();
+            }
+        }
+
+        function formaterPrix(val) {
+            return `${Number(val).toFixed(2)} USD`;
+        }
+
+        function rendreCatalogue() {
+            const filtre = (document.getElementById("champRecherche").value || "").toLowerCase().trim();
+            const tbody = document.getElementById("listeProduits");
+            const lignes = produits.filter(p => p.nom.toLowerCase().includes(filtre) || p.id.toLowerCase().includes(filtre));
+
+            tbody.innerHTML = lignes.map(p => `
+                <tr>
+                    <td class="py-3 pr-3 font-medium">
+                        <div>${p.nom}</div>
+                        <div class="text-xs" style="color: var(--pharma-muted);">${p.id}</div>
+                    </td>
+                    <td class="py-3 px-3">
+                        <span class="px-2 py-0.5 rounded text-xs font-semibold ${p.stock > 10 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
+                            ${p.stock}
+                        </span>
+                    </td>
+                    <td class="py-3 px-3 font-semibold">${formaterPrix(p.prix)}</td>
+                    <td class="py-3 pl-3 text-right">
+                        <button type="button" onclick="ajouterAuPanier('${p.id}')"
+                                ${p.stock <= 0 ? "disabled" : ""}
+                                class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-40"
+                                style="background-color: var(--pharma-green);">
+                            Ajouter
+                        </button>
+                    </td>
+                </tr>
+            `).join("") || `<tr><td colspan="4" class="py-4 text-center text-xs" style="color: var(--pharma-muted);">Aucun produit trouvé.</td></tr>`;
+
+            document.getElementById("kpiProduits").textContent = produits.length;
+        }
+
+        function ajouterAuPanier(id) {
+            const prod = produits.find(p => p.id === id);
+            if (!prod || prod.stock <= 0) return;
+
+            const existant = panier.find(item => item.id === id);
+            if ((existant ? existant.qte : 0) + 1 > prod.stock) {
+                afficherMessage("Stock insuffisant pour cet article.");
+                return;
+            }
+
+            if (existant) existant.qte += 1;
+            else panier.push({ id: prod.id, nom: prod.nom, prix: Number(prod.prix), qte: 1 });
+
+            afficherMessage("");
+            rendrePanier();
+        }
+
+        function retirerDuPanier(id) {
+            panier = panier.filter(item => item.id !== id);
+            rendrePanier();
+        }
+
+        function viderPanier() {
+            panier = [];
+            afficherMessage("");
+            rendrePanier();
+        }
+
+        function calculerTotal() {
+            return panier.reduce((acc, item) => acc + item.prix * item.qte, 0);
+        }
+
+        function rendrePanier() {
+            const ul = document.getElementById("listePanier");
+            const total = calculerTotal();
+            const nbArticles = panier.reduce((acc, item) => acc + item.qte, 0);
+
+            ul.innerHTML = panier.map(item => `
+                <li class="py-2.5 flex items-center justify-between gap-2">
+                    <div>
+                        <p class="font-medium leading-snug">${item.nom}</p>
+                        <p class="text-xs" style="color: var(--pharma-muted);">${item.qte} × ${formaterPrix(item.prix)}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-semibold">${formaterPrix(item.qte * item.prix)}</span>
+                        <button type="button" onclick="retirerDuPanier('${item.id}')" class="text-xs text-rose-600 hover:underline">
+                            Retirer
+                        </button>
+                    </div>
+                </li>
+            `).join("") || `<li class="py-4 text-xs text-center" style="color: var(--pharma-muted);">Panier vide.</li>`;
+
+            document.getElementById("kpiPanier").textContent = nbArticles;
+            document.getElementById("kpiTotal").textContent = formaterPrix(total);
+            document.getElementById("montantTotalTexte").textContent = formaterPrix(total);
+            mettreAJourFacture();
+        }
+
+        function mettreAJourFacture() {
+            const client = document.getElementById("nomClient").value || "Client comptoir";
+            const total = calculerTotal();
+            document.getElementById("factureClient").textContent = `Client : ${client}`;
+            document.getElementById("factureDate").textContent = `Date : ${new Date().toLocaleString("fr-FR")}`;
+            document.getElementById("factureLignes").innerHTML = panier.map(item => `
+                <tr>
+                    <td class="py-2">${item.nom}</td>
+                    <td class="py-2 text-center">${item.qte}</td>
+                    <td class="py-2 text-right">${formaterPrix(item.prix)}</td>
+                    <td class="py-2 text-right">${formaterPrix(item.qte * item.prix)}</td>
+                </tr>
+            `).join("");
+            document.getElementById("factureTotal").textContent = formaterPrix(total);
+
+            const qrContainer = document.getElementById("qrcodeFacture");
+            qrContainer.innerHTML = "";
+            if (window.QRCode && panier.length > 0) {
+                new QRCode(qrContainer, {
+                    text: JSON.stringify({ app: "PharmaRDC", client, total: total.toFixed(2), date: new Date().toISOString() }),
+                    width: 96,
+                    height: 96
                 });
-                enregistrerEtatLicences();
-            }
-
-            verifierAccesAbonnement();
-        }
-
-        function deconnexionAbonnement() {
-            if (confirm("Verrouiller l'application sur cet appareil ?")) {
-                localStorage.removeItem('statutAbonnement');
-                localStorage.removeItem('estConnecteAdmin');
-                statutAbonnement = 'inactif';
-                estConnecteAdmin = false;
-                verifierAccesAbonnement();
             }
         }
 
-        // Identité et paramètres fiscaux de l'officine
-        let profilOfficine = JSON.parse(localStorage.getItem('profilOfficineAdmin')) || {
-            nom: "PHARMACIE EXCELLENCE",
-            adresse: "Avenue du Commerce N° 12, Kinshasa",
-            nif: "A24001234B"
-        };
-
-        function appliquerIdentiteOfficine() {
-            document.title = profilOfficine.nom + " - Gestion d'Officine";
-            document.getElementById('headerNomPharmacie').innerText = profilOfficine.nom;
-            document.getElementById('headerSousTitre').innerText = profilOfficine.adresse;
-            document.getElementById('factureNomPharmacie').innerText = profilOfficine.nom;
-            document.getElementById('factureAdressePharmacie').innerText = profilOfficine.adresse;
-            document.getElementById('factureNif').innerText = "NIF: " + profilOfficine.nif;
-        }
-
-        function ouvrirParametresOfficine() {
-            document.getElementById('inputNomPharmacie').value = profilOfficine.nom;
-            document.getElementById('inputAdressePharmacie').value = profilOfficine.adresse;
-            document.getElementById('inputNif').value = profilOfficine.nif;
-            document.getElementById('modaleParametres').classList.remove('hidden');
-        }
-
-        function fermerParametresOfficine() {
-            document.getElementById('modaleParametres').classList.add('hidden');
-        }
-
-        function sauvegarderIdentiteOfficine() {
-            profilOfficine = {
-                nom: document.getElementById('inputNomPharmacie').value.trim().toUpperCase() || "PHARMACIE",
-                adresse: document.getElementById('inputAdressePharmacie').value.trim() || "Kinshasa",
-                nif: document.getElementById('inputNif').value.trim() || "A00000"
-            };
-            localStorage.setItem('profilOfficineAdmin', JSON.stringify(profilOfficine));
-            appliquerIdentiteOfficine();
-            fermerParametresOfficine();
-        }
-
-        // Catalogue, stock, taux et registre des ventes (inventaire)
-        const catalogueMedicaments = [
-            { nom: "Paracétamol 500mg (Comprimés)", prixUsd: 0.50 },
-            { nom: "Amoxicilline 500mg (Gélules)", prixUsd: 2.00 },
-            { nom: "Artemether + Lumefantrine (Paludisme)", prixUsd: 3.50 },
-            { nom: "Ibuprofène 400mg (Comprimés)", prixUsd: 0.80 },
-            { nom: "Oméprazole 20mg (Gélules)", prixUsd: 1.50 }
-        ];
-
-        let tauxChange = parseFloat(localStorage.getItem('taux')) || 2850;
-        document.getElementById('tauxChange').value = tauxChange;
-
-        let stocks = JSON.parse(localStorage.getItem('stocksAdmin')) || [
-            { id: 1, nom: "Paracétamol 500mg (Comprimés)", lot: "LOTA22", qte: 50, exp: "2027-08-15", prixUsd: 0.50 },
-            { id: 2, nom: "Amoxicilline 500mg (Gélules)", lot: "LOTB99", qte: 12, exp: "2026-12-15", prixUsd: 2.00 }
-        ];
-
-        let ventesHistorique = JSON.parse(localStorage.getItem('ventesAdmin')) || [];
-
-        function formaterChampCsv(valeur) {
-            return `"${String(valeur ?? "").replace(/"/g, '""')}"`;
-        }
-
-        function telechargerFichierCsv(nomFichier, lignes) {
-            const contenu = "\uFEFF" + lignes.join("\n");
-            const blob = new Blob([contenu], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            const lien = document.createElement("a");
-            lien.href = url;
-            lien.download = nomFichier;
-            document.body.appendChild(lien);
-            lien.click();
-            document.body.removeChild(lien);
-            URL.revokeObjectURL(url);
-        }
-
-        function exporterStocksCSV() {
-            const lignes = [
-                ["Produit", "Lot", "Quantite", "Expiration", "Prix USD", "Statut"].map(formaterChampCsv).join(";")
-            ];
-            stocks.forEach(item => {
-                const etat = evaluerPeremption(item.exp);
-                lignes.push([
-                    item.nom,
-                    item.lot,
-                    item.qte,
-                    item.exp,
-                    item.prixUsd,
-                    etat.estAlerte ? "Alerte" : "Conforme"
-                ].map(formaterChampCsv).join(";"));
-            });
-            telechargerFichierCsv("stock_pharmardc.csv", lignes);
-        }
-
-        function exporterVentesCSV() {
-            if (!ventesHistorique.length) {
-                alert("Aucune vente enregistrée à exporter.");
-                return;
-            }
-            const lignes = [
-                ["Facture", "Date", "Client", "Produit", "Quantite", "Total HT USD", "TVA USD", "Total TTC USD", "Total TTC CDF", "Devise", "Montant Recu", "Monnaie Rendue"]
-                    .map(formaterChampCsv).join(";")
-            ];
-            ventesHistorique.forEach(v => {
-                lignes.push([
-                    v.numFacture,
-                    v.date,
-                    v.client || "Passager",
-                    v.nomProduit,
-                    v.qte || 1,
-                    v.totalHt,
-                    v.montantTva,
-                    v.totalUsd,
-                    v.totalCdf,
-                    v.devise,
-                    v.montantRecu,
-                    v.monnaieRendue
-                ].map(formaterChampCsv).join(";"));
-            });
-            const dateJour = new Date().toISOString().slice(0, 10);
-            telechargerFichierCsv(`inventaire_ventes_${dateJour}.csv`, lignes);
-        }
-
-        function viderVentesApresInventaire() {
-            if (!ventesHistorique.length) {
-                alert("Le registre des ventes est déjà vide.");
-                return;
-            }
-            const ok = confirm(
-                "Confirmer la clôture de cette période d'inventaire et vider le registre des ventes ?\n\nPensez à exporter le fichier CSV avant de vider."
-            );
-            if (!ok) return;
-
-            ventesHistorique = [];
-            localStorage.setItem('ventesAdmin', JSON.stringify(ventesHistorique));
-            afficherHistoriqueVentes();
-            mettreAJourKPIs();
-            alert("Registre des ventes réinitialisé pour la période suivante.");
-        }
-
-        function afficherHistoriqueVentes() {
-            const corps = document.getElementById('tableauVentesInventaire');
-            if (!corps) return;
-            corps.innerHTML = '';
-
-            if (!ventesHistorique.length) {
-                corps.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="p-5 text-center text-slate-400">
-                            Aucune vente enregistrée pour la période en cours.
-                        </td>
-                    </tr>
-                `;
+        async function validerVente() {
+            if (panier.length === 0) {
+                afficherMessage("Ajoutez au moins un produit avant d'encaisser.");
                 return;
             }
 
-            ventesHistorique.forEach(v => {
-                corps.innerHTML += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 font-mono font-bold text-slate-800">${v.numFacture}</td>
-                        <td class="p-3 text-slate-500">${v.date}</td>
-                        <td class="p-3">${v.client || 'Passager'}</td>
-                        <td class="p-3 font-medium">${v.nomProduit}</td>
-                        <td class="p-3 text-center font-bold">${v.qte || 1}</td>
-                        <td class="p-3 text-right font-bold text-emerald-700">${v.totalUsd} $</td>
-                        <td class="p-3 text-right font-semibold text-teal-700">${v.totalCdf} CDF</td>
-                        <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold">${v.devise}</span></td>
-                    </tr>
-                `;
-            });
-        }
+            const client = document.getElementById("nomClient").value || "Client comptoir";
 
-        function initialiserCatalogueSelect() {
-            const selectCat = document.getElementById('selectCatalogue');
-            selectCat.innerHTML = '<option value="">-- Sélectionner un médicament de référence --</option>';
-            catalogueMedicaments.forEach((med, index) => {
-                selectCat.innerHTML += `<option value="${index}">${med.nom} (~$${med.prixUsd})</option>`;
-            });
-        }
-
-        function remplissageAutomatiqueCatalogue() {
-            const index = document.getElementById('selectCatalogue').value;
-            if (index === "") return;
-            const med = catalogueMedicaments[index];
-            document.getElementById('nomProduit').value = med.nom;
-            document.getElementById('prixUsd').value = med.prixUsd;
-            document.getElementById('numLot').value = "LOT-" + Math.floor(10000 + Math.random() * 90000);
-            document.getElementById('qteStock').value = 50;
-        }
-
-        function mettreAJourTaux() {
-            tauxChange = parseFloat(document.getElementById('tauxChange').value) || 2850;
-            localStorage.setItem('taux', tauxChange);
-            calculerTotalVente();
-            mettreAJourKPIs();
-        }
-
-        function sauvegarderEtAfficher() {
-            localStorage.setItem('stocksAdmin', JSON.stringify(stocks));
-            localStorage.setItem('ventesAdmin', JSON.stringify(ventesHistorique));
-            afficherStocks();
-            remplirSelectProduits();
-            afficherHistoriqueVentes();
-            mettreAJourKPIs();
-        }
-
-        function evaluerPeremption(dateExp) {
-            const aujourdHui = new Date();
-            const expiration = new Date(dateExp);
-            const diffJours = Math.ceil((expiration - aujourdHui) / (1000 * 3600 * 24));
-            if (diffJours <= 0 || (diffJours / 30.43) <= 1) {
-                return { estAlerte: true, classe: "bg-rose-100 text-rose-700 font-bold" };
-            }
-            return { estAlerte: false, classe: "bg-emerald-100 text-emerald-800" };
-        }
-
-        function mettreAJourKPIs() {
-            let totalUsd = 0;
-            ventesHistorique.forEach(v => { totalUsd += parseFloat(v.totalUsd) || 0; });
-            const totalCdf = totalUsd * tauxChange;
-            let alertes = 0;
-            stocks.forEach(s => { if (evaluerPeremption(s.exp).estAlerte) alertes++; });
-
-            document.getElementById('kpiCaUsd').innerText = totalUsd.toFixed(2) + " $";
-            document.getElementById('kpiCaCdf').innerText = totalCdf.toLocaleString() + " CDF";
-            document.getElementById('kpiTotalVentes').innerText = ventesHistorique.length;
-            document.getElementById('kpiAlertes').innerText = alertes;
-        }
-
-        function afficherStocks() {
-            const tbody = document.getElementById('tableauStock');
-            tbody.innerHTML = '';
-            stocks.forEach(item => {
-                const etat = evaluerPeremption(item.exp);
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3.5 font-medium">${item.nom}</td>
-                        <td class="p-3.5 font-mono text-slate-500">${item.lot}</td>
-                        <td class="p-3.5 font-bold text-emerald-700">${item.qte}</td>
-                        <td class="p-3.5 text-slate-600">${item.exp}</td>
-                        <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] ${etat.classe}">${etat.estAlerte ? 'Alerte' : 'Conforme'}</span></td>
-                    </tr>
-                `;
-            });
-        }
-
-        function remplirSelectProduits() {
-            const select = document.getElementById('selectProduit');
-            select.innerHTML = '<option value="">-- Choisir un médicament en stock --</option>';
-            stocks.forEach((item, index) => {
-                if (item.qte > 0) {
-                    select.innerHTML += `<option value="${index}">${item.nom} (Stock: ${item.qte}) - $${item.prixUsd}</option>`;
-                }
-            });
-        }
-
-        function ajouterProduitStock() {
-            const nom = document.getElementById('nomProduit').value.trim();
-            const lot = document.getElementById('numLot').value.trim();
-            const qte = parseInt(document.getElementById('qteStock').value, 10);
-            const exp = document.getElementById('dateExp').value;
-            const prixUsd = parseFloat(document.getElementById('prixUsd').value);
-
-            if (!nom || !lot || !qte || !exp || isNaN(prixUsd)) {
-                alert("Complétez tous les champs du lot.");
-                return;
-            }
-
-            stocks.push({ id: Date.now(), nom, lot, qte, exp, prixUsd });
-            sauvegarderEtAfficher();
-
-            document.getElementById('selectCatalogue').value = "";
-            document.getElementById('nomProduit').value = '';
-            document.getElementById('numLot').value = '';
-            document.getElementById('qteStock').value = '';
-            document.getElementById('dateExp').value = '';
-            document.getElementById('prixUsd').value = '';
-        }
-
-        function chargerPrixProduit() {
-            const index = document.getElementById('selectProduit').value;
-            if (index === "") {
-                document.getElementById('posPrixUsd').value = '';
-                return;
-            }
-            document.getElementById('posPrixUsd').value = stocks[index].prixUsd;
-            calculerTotalVente();
-        }
-
-        function calculerTotalVente() {
-            const index = document.getElementById('selectProduit').value;
-            const qte = parseInt(document.getElementById('posQte').value, 10) || 1;
-            const tauxTva = parseFloat(document.getElementById('regimeTva').value) || 0;
-            if (index === "") return;
-
-            const produit = stocks[index];
-            const totalTtcUsd = produit.prixUsd * qte;
-            const totalHtUsd = totalTtcUsd / (1 + (tauxTva / 100));
-            const montantTvaUsd = totalTtcUsd - totalHtUsd;
-            const totalCdf = totalTtcUsd * tauxChange;
-
-            document.getElementById('apercuHt').innerText = totalHtUsd.toFixed(2) + " $";
-            document.getElementById('apercuTva').innerText = montantTvaUsd.toFixed(2) + " $";
-            document.getElementById('totalUsdAffichage').innerText = totalTtcUsd.toFixed(2) + " $";
-            document.getElementById('totalCdfAffichage').innerText = totalCdf.toLocaleString() + " CDF";
-        }
-
-        function validerVenteEtGenererFacture() {
-            const index = document.getElementById('selectProduit').value;
-            const qteVendue = parseInt(document.getElementById('posQte').value, 10) || 1;
-            const devise = document.getElementById('devisePaiement').value;
-            const montantRecu = parseFloat(document.getElementById('montantRecu').value);
-            const clientNom = document.getElementById('clientNom').value.trim() || "Passager";
-            const tauxTva = parseFloat(document.getElementById('regimeTva').value) || 0;
-
-            if (index === "") {
-                alert("Sélectionnez un produit.");
-                return;
-            }
-            const produit = stocks[index];
-            if (qteVendue > produit.qte) {
-                alert("Quantité demandée supérieure au stock disponible.");
-                return;
-            }
-
-            const totalTtcUsd = produit.prixUsd * qteVendue;
-            const totalHtUsd = totalTtcUsd / (1 + (tauxTva / 100));
-            const montantTvaUsd = totalTtcUsd - totalHtUsd;
-            const totalCdf = totalTtcUsd * tauxChange;
-
-            if (isNaN(montantRecu)) {
-                alert("Saisissez le montant reçu.");
-                return;
-            }
-
-            let monnaieTexte = "";
-            if (devise === 'USD') {
-                if (montantRecu < totalTtcUsd) {
-                    alert("Montant reçu insuffisant.");
+            if (supabaseClient) {
+                const { error } = await supabaseClient.rpc("enregistrer_vente", {
+                    p_client: client,
+                    p_articles: panier
+                });
+                if (error) {
+                    afficherMessage("Erreur lors de la vente : " + error.message);
                     return;
                 }
-                const renduUsd = montantRecu - totalTtcUsd;
-                monnaieTexte = `${renduUsd.toFixed(2)} $ (${(renduUsd * tauxChange).toLocaleString()} CDF)`;
+                await chargerProduitsSupabase();
             } else {
-                if (montantRecu < totalCdf) {
-                    alert("Montant reçu insuffisant.");
-                    return;
-                }
+                panier.forEach(item => {
+                    const prod = produits.find(p => p.id === item.id);
+                    if (prod) prod.stock = Math.max(0, prod.stock - item.qte);
+                });
+                rendreCatalogue();
+            }
+
+            afficherMessage("Vente enregistrée avec succès.");
+            imprimerFacture();
+            panier = [];
+            rendrePanier();
+        }
+
+        function imprimerFacture() {
+            mettreAJourFacture();
+            window.print();
+        }
+
+        function afficherMessage(msg) {
+            document.getElementById("messageFeedback").textContent = msg;
+        }
+
+        initialiserApp();
+    </script>
+</body>
+</html>
                 const renduCdf = montantRecu - totalCdf;
                 monnaieTexte = `${renduCdf.toLocaleString()} CDF (${(renduCdf / tauxChange).toFixed(2)} $)`;
             }
