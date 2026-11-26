@@ -1025,57 +1025,55 @@
                 panneauAdmin.classList.add("hidden");
             }
         }
-
-        aasync function connecter() {
-    const msgEl = document.getElementById("authMessage");
-    if (!supabaseClient) {
-        msgEl.textContent = "Supabase n'est pas configuré (SUPABASE_URL / SUPABASE_ANON_KEY manquants).";
-        return;
-    }
-
-    const email = document.getElementById("authEmail").value.trim();
-    const password = document.getElementById("authPassword").value;
-
-    if (!email || !password) {
-        msgEl.textContent = "Veuillez saisir votre email et votre mot de passe.";
-        return;
-    }
-
-    msgEl.textContent = "Connexion en cours...";
-    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    msgEl.textContent = error ? error.message : "";
-}
-
-async function inscrire() {
-    const msgEl = document.getElementById("authMessage");
-    if (!supabaseClient) {
-        msgEl.textContent = "Supabase n'est pas configuré (SUPABASE_URL / SUPABASE_ANON_KEY manquants).";
-        return;
-    }
-
-    const email = document.getElementById("authEmail").value.trim();
-    const password = document.getElementById("authPassword").value;
-
-    if (!email || password.length < 6) {
-        msgEl.textContent = "Entrez un email valide et un mot de passe d'au moins 6 caractères.";
-        return;
-    }
-
-    msgEl.textContent = "Création du compte en cours...";
-    const { data, error } = await supabaseClient.auth.signUp({ email, password });
-
-    if (error) {
-        msgEl.textContent = error.message;
-        return;
-    }
-
-    if (data?.session) {
-        msgEl.textContent = "Compte créé et connecté.";
-    } else {
-        msgEl.textContent = "Compte créé ! Vérifiez votre boîte mail pour confirmer l'adresse, ou désactivez 'Confirm email' dans Supabase > Authentication > Providers > Email.";
-    }
-}
-
+        async function connecter() {
+            const msgEl = document.getElementById("authMessage");
+            if (!supabaseClient) {
+                msgEl.textContent = "Supabase n'est pas configuré (SUPABASE_URL / SUPABASE_ANON_KEY manquants).";
+                return;
+            }
+        
+            const email = document.getElementById("authEmail").value.trim();
+            const password = document.getElementById("authPassword").value;
+        
+            if (!email || !password) {
+                msgEl.textContent = "Veuillez saisir votre email et votre mot de passe.";
+                return;
+            }
+        
+            msgEl.textContent = "Connexion en cours...";
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            msgEl.textContent = error ? error.message : "";
+        }
+        
+        async function inscrire() {
+            const msgEl = document.getElementById("authMessage");
+            if (!supabaseClient) {
+                msgEl.textContent = "Supabase n'est pas configuré (SUPABASE_URL / SUPABASE_ANON_KEY manquants).";
+                return;
+            }
+        
+            const email = document.getElementById("authEmail").value.trim();
+            const password = document.getElementById("authPassword").value;
+        
+            if (!email || password.length < 6) {
+                msgEl.textContent = "Entrez un email valide et un mot de passe d'au moins 6 caractères.";
+                return;
+            }
+        
+            msgEl.textContent = "Création du compte en cours...";
+            const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        
+            if (error) {
+                msgEl.textContent = error.message;
+                return;
+            }
+        
+            if (data?.session) {
+                msgEl.textContent = "Compte créé et connecté.";
+            } else {
+                msgEl.textContent = "Compte créé ! Vérifiez votre boîte mail pour confirmer l'adresse, ou désactivez 'Confirm email' dans Supabase > Authentication > Providers > Email.";
+            }
+        }
         async function deconnecter() {
             if (supabaseClient) await supabaseClient.auth.signOut();
         }
